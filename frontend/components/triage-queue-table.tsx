@@ -25,7 +25,7 @@ function rankStyle(index: number) {
 
 export function TriageQueueTable({ grievances, selectedId, onSelect }: TriageQueueTableProps) {
   return (
-    <div className="rounded-[30px] border border-white/6 bg-[#111723] p-6 shadow-[0_22px_60px_rgba(3,8,20,0.34)]">
+    <div className="rounded-[30px] border border-white/6 bg-gradient-to-br from-white/[0.07] via-white/[0.04] to-blue-500/8 p-6 shadow-[0_22px_60px_rgba(3,8,20,0.34)]">
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-300">Priority List</p>
@@ -51,7 +51,7 @@ export function TriageQueueTable({ grievances, selectedId, onSelect }: TriageQue
               className={`w-full rounded-[28px] border p-5 text-left transition ${
                 isSelected
                   ? 'border-blue-500/40 bg-blue-500/10 shadow-[0_16px_40px_rgba(47,111,237,0.16)]'
-                  : 'border-white/6 bg-white/[0.02] hover:bg-white/[0.04]'
+                  : 'border-white/6 bg-black/15 hover:bg-white/[0.04]'
               }`}
             >
               <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -88,12 +88,12 @@ export function TriageQueueTable({ grievances, selectedId, onSelect }: TriageQue
                 </div>
 
                 <div className="min-w-0 xl:w-[380px]">
-                  <div className="rounded-3xl border border-white/8 bg-[#0d121c] p-4">
+                  <div className="rounded-3xl border border-white/8 bg-gradient-to-br from-white/[0.06] to-white/[0.03] p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Necessary action</p>
                     <p className="mt-2 text-sm leading-6 text-slate-200">{grievance.action}</p>
 
                     <div className="mt-4 grid grid-cols-2 gap-3">
-                      <div className="rounded-2xl bg-white/[0.04] p-3">
+                      <div className="rounded-2xl bg-white/[0.07] p-3">
                         <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">People</p>
                         <p className="mt-1 text-lg font-semibold text-white">{grievance.peopleCount}</p>
                       </div>
@@ -120,7 +120,7 @@ export function TriageQueueTable({ grievances, selectedId, onSelect }: TriageQue
         })}
 
         {grievances.length === 0 && (
-          <div className="rounded-[26px] border border-dashed border-white/8 bg-white/[0.02] p-8 text-center">
+          <div className="rounded-[26px] border border-dashed border-white/8 bg-white/[0.04] p-8 text-center">
             <p className="text-sm font-medium text-white">No issue clusters match the current filters.</p>
             <p className="mt-2 text-sm text-slate-500">Try another people threshold, date window, or complaint volume band.</p>
           </div>

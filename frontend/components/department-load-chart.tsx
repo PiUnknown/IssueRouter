@@ -23,7 +23,7 @@ const COLORS = ['#2f6fed', '#4f8cff', '#f59e0b', '#ef4444'];
 
 export function DepartmentLoadChart() {
   return (
-    <div className="rounded-[26px] border border-white/6 bg-[#111723] p-6 shadow-[0_18px_44px_rgba(3,8,20,0.26)]">
+    <div className="rounded-[26px] border border-white/6 bg-gradient-to-br from-white/[0.08] to-violet-500/8 p-6 shadow-[0_18px_44px_rgba(3,8,20,0.26)]">
       <h3 className="mb-6 text-lg font-semibold text-white">Department Load Distribution</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data}>

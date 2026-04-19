@@ -57,7 +57,7 @@ export function FilterBar({ filters, setFilters }: FilterBarProps) {
   ];
 
   return (
-    <div className="rounded-[28px] border border-white/6 bg-[#111723] p-5 shadow-[0_22px_60px_rgba(3,8,20,0.34)]">
+    <div className="rounded-[28px] border border-white/6 bg-gradient-to-br from-white/[0.07] via-white/[0.03] to-blue-500/8 p-5 shadow-[0_22px_60px_rgba(3,8,20,0.34)]">
       <div className="mb-4 flex items-center gap-2">
         <div className="rounded-xl bg-blue-600 px-2 py-1 text-white">
           <Filter className="h-4 w-4" />
@@ -73,7 +73,7 @@ export function FilterBar({ filters, setFilters }: FilterBarProps) {
               value={filters.searchQuery}
               onChange={(e) => setFilters({ ...filters, searchQuery: e.target.value })}
               placeholder="Search cluster, action, location..."
-              className="w-full rounded-2xl border border-white/8 bg-white/[0.03] py-2.5 pl-10 pr-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
+              className="w-full rounded-2xl border border-white/8 bg-[#080c12] py-2.5 pl-10 pr-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
             />
           </div>
         </Field>
@@ -82,7 +82,7 @@ export function FilterBar({ filters, setFilters }: FilterBarProps) {
           <select
             value={filters.minPeople}
             onChange={(e) => setFilters({ ...filters, minPeople: e.target.value })}
-            className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
+            className="w-full rounded-2xl border border-white/8 bg-[#080c12] px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
           >
             {peopleThresholds.map((item) => (
               <option key={item.value} value={item.value}>
@@ -96,7 +96,7 @@ export function FilterBar({ filters, setFilters }: FilterBarProps) {
           <select
             value={filters.dateWindow}
             onChange={(e) => setFilters({ ...filters, dateWindow: e.target.value })}
-            className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
+            className="w-full rounded-2xl border border-white/8 bg-[#080c12] px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
           >
             {dateWindows.map((item) => (
               <option key={item.value} value={item.value}>
@@ -110,7 +110,7 @@ export function FilterBar({ filters, setFilters }: FilterBarProps) {
           <select
             value={filters.volumeBand}
             onChange={(e) => setFilters({ ...filters, volumeBand: e.target.value })}
-            className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
+            className="w-full rounded-2xl border border-white/8 bg-[#080c12] px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
           >
             {volumeBands.map((item) => (
               <option key={item.value} value={item.value}>
@@ -124,7 +124,7 @@ export function FilterBar({ filters, setFilters }: FilterBarProps) {
           <select
             value={filters.location}
             onChange={(e) => setFilters({ ...filters, location: e.target.value })}
-            className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
+            className="w-full rounded-2xl border border-white/8 bg-[#080c12] px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
           >
             {locations.map((loc) => (
               <option key={loc} value={loc}>
@@ -139,7 +139,7 @@ export function FilterBar({ filters, setFilters }: FilterBarProps) {
             <select
               value={filters.department}
               onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-              className="w-full rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
+              className="w-full rounded-2xl border border-white/8 bg-[#080c12] px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/25"
             >
               {departments.map((dept) => (
                 <option key={dept} value={dept}>

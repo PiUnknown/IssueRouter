@@ -49,7 +49,7 @@ export function StatCards() {
       {stats.map((stat, idx) => (
         <div
           key={idx}
-          className={`rounded-[24px] border border-white/6 bg-gradient-to-br ${stat.tint} p-5 shadow-[0_18px_44px_rgba(3,8,20,0.26)]`}
+          className={`rounded-[24px] border border-white/6 bg-gradient-to-br from-white/[0.08] ${stat.tint} p-5 shadow-[0_18px_44px_rgba(3,8,20,0.26)]`}
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-slate-400">{stat.title}</h3>

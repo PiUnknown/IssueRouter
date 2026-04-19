@@ -101,10 +101,10 @@ export function HeatmapView() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-[1.3fr_0.8fr]">
-      <div className="overflow-hidden rounded-[30px] border border-white/6 bg-[#111723] p-6 shadow-[0_22px_60px_rgba(3,8,20,0.34)]">
+      <div className="overflow-hidden rounded-[30px] border border-white/6 bg-gradient-to-br from-white/[0.07] via-white/[0.04] to-blue-500/8 p-6 shadow-[0_22px_60px_rgba(3,8,20,0.34)]">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">Spatial Risk View</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-200">Spatial Risk View</p>
             <h3 className="mt-2 text-2xl font-semibold text-white">Interactive complaint hotspot map</h3>
             <p className="mt-2 max-w-2xl text-sm text-slate-400">
               Select a location to inspect how many people are complaining, what department owns the issue, and how quickly the city needs to respond.
@@ -118,7 +118,7 @@ export function HeatmapView() {
 
         <div className="relative min-h-[420px] overflow-hidden rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,#0c1018,#090d14)]">
           <div className="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:68px_68px]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(17,168,154,0.08),transparent_58%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.10),transparent_58%)]" />
 
           {hotspots.map((spot) => {
             const size = 118 + spot.complaints * 0.52;
@@ -138,11 +138,11 @@ export function HeatmapView() {
                     height: size,
                     opacity: selected ? 1 : 0.72,
                     backgroundImage:
-                      'radial-gradient(circle, rgba(255,255,255,0.92) 0%, rgba(17,168,154,0.34) 24%, rgba(59,130,246,0.28) 46%, rgba(245,158,11,0.22) 70%, rgba(239,68,68,0.14) 84%, transparent 100%)',
+                      'radial-gradient(circle, rgba(255,255,255,0.92) 0%, rgba(37,99,235,0.34) 24%, rgba(139,92,246,0.28) 46%, rgba(245,158,11,0.22) 70%, rgba(239,68,68,0.14) 84%, transparent 100%)',
                   }}
                 />
-                <div className={`absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white ${selected ? 'bg-white shadow-[0_0_24px_rgba(255,255,255,0.9)]' : 'bg-emerald-300/90'}`} />
-                <div className={`absolute left-1/2 top-[calc(100%+10px)] min-w-[168px] -translate-x-1/2 rounded-2xl border px-3 py-2 text-center shadow-xl ${selected ? 'border-emerald-400/30 bg-[#111723]' : 'border-white/8 bg-[#111723]/92'}`}>
+                <div className={`absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white ${selected ? 'bg-white shadow-[0_0_24px_rgba(255,255,255,0.9)]' : 'bg-blue-300/90'}`} />
+                <div className={`absolute left-1/2 top-[calc(100%+10px)] min-w-[168px] -translate-x-1/2 rounded-2xl border px-3 py-2 text-center shadow-xl ${selected ? 'border-blue-400/30 bg-[#111723]' : 'border-white/8 bg-[#111723]/92'}`}>
                   <p className="text-sm font-semibold text-white">{spot.name}</p>
                   <p className="mt-1 text-xs text-slate-400">{spot.people} people | {spot.complaints} posts</p>
                 </div>
@@ -184,7 +184,7 @@ export function HeatmapView() {
         </div>
       </div>
 
-      <div className="rounded-[30px] border border-white/6 bg-[#111723] p-6 shadow-[0_22px_60px_rgba(3,8,20,0.34)]">
+      <div className="rounded-[30px] border border-white/6 bg-gradient-to-br from-white/[0.07] to-violet-500/8 p-6 shadow-[0_22px_60px_rgba(3,8,20,0.34)]">
         <div className="mb-5">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#5AAAE7]">Location Matrix</p>
           <h4 className="mt-2 text-xl font-semibold text-white">Hotspot ranking by area</h4>
@@ -200,7 +200,7 @@ export function HeatmapView() {
                 <button
                   key={spot.name}
                   onClick={() => setSelectedArea(spot)}
-                  className={`w-full rounded-2xl border p-4 text-left transition ${selected ? 'border-emerald-400/30 bg-emerald-500/10' : 'border-white/8 bg-white/[0.03] hover:bg-white/[0.05]'}`}
+                  className={`w-full rounded-2xl border p-4 text-left transition ${selected ? 'border-blue-400/30 bg-blue-500/10' : 'border-white/8 bg-white/[0.03] hover:bg-white/[0.05]'}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
@@ -246,8 +246,8 @@ function DetailTile({
   solid?: boolean;
 }) {
   return (
-    <div className={`rounded-2xl border p-4 ${solid ? 'border-[#12B4A6]/20 bg-[#12B4A6] text-white' : 'border-white/8 bg-[#0d121c] text-white'}`}>
-      <div className={`flex items-center gap-2 text-xs uppercase tracking-[0.16em] ${solid ? 'text-emerald-100' : 'text-slate-500'}`}>
+    <div className={`rounded-2xl border p-4 ${solid ? 'border-blue-400/20 bg-blue-600 text-white' : 'border-white/8 bg-gradient-to-br from-white/[0.06] to-white/[0.03] text-white'}`}>
+      <div className={`flex items-center gap-2 text-xs uppercase tracking-[0.16em] ${solid ? 'text-blue-100' : 'text-slate-400'}`}>
         {icon}
         {label}
       </div>
