@@ -22,7 +22,7 @@ const data = [
 
 export function GrievanceChart() {
   return (
-    <div className="rounded-[26px] border border-white/6 bg-[#111723] p-6 shadow-[0_18px_44px_rgba(3,8,20,0.26)]">
+    <div className="rounded-[26px] border border-white/6 bg-gradient-to-br from-white/[0.08] to-blue-500/8 p-6 shadow-[0_18px_44px_rgba(3,8,20,0.26)]">
       <h3 className="mb-6 text-lg font-semibold text-white">Grievance Velocity (7 days)</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>

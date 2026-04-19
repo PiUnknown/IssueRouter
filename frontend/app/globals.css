@@ -10,21 +10,21 @@
   --card-foreground: #eef3ff;
   --popover: #111723;
   --popover-foreground: #eef3ff;
-  --primary: #11a89a;
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
   --secondary: #161d2a;
   --secondary-foreground: #d8e2ff;
   --muted: #171d29;
   --muted-foreground: #7f8ba3;
-  --accent: #3b82f6;
-  --accent-foreground: #041316;
+  --accent: #8b5cf6;
+  --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: #1d2637;
   --input: #111723;
-  --ring: #11a89a;
+  --ring: #2563eb;
   --chart-1: #3b82f6;
-  --chart-2: #11a89a;
+  --chart-2: #38bdf8;
   --chart-3: #f59e0b;
   --chart-4: #dc2626;
   --chart-5: #60a5fa;
@@ -46,32 +46,32 @@
   --card-foreground: #eef3ff;
   --popover: #111723;
   --popover-foreground: #eef3ff;
-  --primary: #11a89a;
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
   --secondary: #161d2a;
   --secondary-foreground: #d8e2ff;
   --muted: #171d29;
   --muted-foreground: #7f8ba3;
-  --accent: #3b82f6;
+  --accent: #8b5cf6;
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: #1d2637;
   --input: #111723;
-  --ring: #11a89a;
+  --ring: #2563eb;
   --chart-1: #3b82f6;
-  --chart-2: #11a89a;
+  --chart-2: #38bdf8;
   --chart-3: #f59e0b;
   --chart-4: #ef4444;
   --chart-5: #94a3b8;
   --sidebar: #0c1018;
   --sidebar-foreground: #eef3ff;
-  --sidebar-primary: #11a89a;
+  --sidebar-primary: #2563eb;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #151c29;
   --sidebar-accent-foreground: #eef3ff;
   --sidebar-border: #1b2434;
-  --sidebar-ring: #11a89a;
+  --sidebar-ring: #2563eb;
 }
 
 @theme inline {
@@ -125,8 +125,25 @@
   body {
     @apply bg-background text-foreground antialiased;
     background-image:
-      radial-gradient(circle at top left, rgba(17,168,154,0.12), transparent 24%),
-      radial-gradient(circle at 82% 14%, rgba(59,130,246,0.10), transparent 22%),
+      radial-gradient(circle at top left, rgba(59,130,246,0.13), transparent 24%),
+      radial-gradient(circle at 82% 14%, rgba(139,92,246,0.10), transparent 22%),
       linear-gradient(180deg, #0a0d14 0%, #090c12 100%);
+  }
+
+  input,
+  select,
+  textarea {
+    color-scheme: dark;
+  }
+
+  select {
+    background-color: #080c12;
+    background-image:
+      linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  }
+
+  option {
+    background-color: #080c12;
+    color: #eef3ff;
   }
 }

@@ -1,15 +1,16 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+}
 
 export const metadata: Metadata = {
   title: 'IssueRouter',
   description: 'AI grievance triage assistant for high-volume civic issue routing',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
   icons: {
     icon: [
       {
