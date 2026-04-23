@@ -117,11 +117,11 @@ function LeafletMap({ mode }) {
       }).filter(Boolean)
 
       heatRef.current = window.L.heatLayer(heatData, {
-        radius: 45,
-        blur: 30,
+        radius: 50,
+        blur: 35,
         maxZoom: 13,
         max: 1.0,
-        gradient: { 0.2: '#6366f1', 0.5: '#f97316', 0.8: '#ef4444' },
+        gradient: { 0.3: '#6366f1', 0.6: '#f97316', 0.85: '#ef4444', 1.0: '#be123c' },
       })
     }
 
@@ -183,18 +183,20 @@ export default function Maps() {
     <div className="space-y-4">
 
       {/* ── Page header ───────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-            Complaint hotspot map
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
+        <div className="max-w-3xl">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+            Complaint Hotspot & Density Map
           </h2>
-          <p className="text-[13px] text-gray-400 dark:text-gray-500 mt-0.5">
-            Select a location to inspect complaints, department ownership, and response urgency
+          <p className="text-[13.5px] font-medium text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">
+            This interactive heatmap visualizes the geographic distribution of critical civic issues. 
+            <strong className="text-indigo-500 dark:text-indigo-400 font-semibold"> Red areas</strong> indicate severe complaint density requiring immediate intervention. 
+            Use the controls to switch views and select individual pins to inspect detailed area-wise department ownership and response urgency.
           </p>
         </div>
 
         {/* Map mode toggle */}
-        <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 self-start flex-shrink-0">
+        <div className="flex items-center gap-1 glass-panel rounded-lg p-1 self-start flex-shrink-0">
           {[
             { key: 'pins', label: 'Pins', icon: MapPin },
             { key: 'heatmap', label: 'Heatmap', icon: Layers },
@@ -222,7 +224,7 @@ export default function Maps() {
       <div className="flex flex-col lg:flex-row gap-4">
 
         {/* Map */}
-        <div className="flex-1 min-h-[320px] h-[45vw] lg:h-[520px] bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div className="flex-1 min-h-[320px] h-[45vw] lg:h-[520px] glass-panel rounded-xl overflow-hidden shadow-2xl relative z-0">
           {scriptsReady
             ? <LeafletMap mode={mode} />
             : (
@@ -234,11 +236,11 @@ export default function Maps() {
         </div>
 
         {/* Cluster list sidebar */}
-        <div className="w-full lg:w-72 flex flex-col gap-3">
-          <div className="flex items-center gap-2 px-1">
-            <List size={14} className="text-gray-400" />
-            <span className="text-[12px] font-medium text-gray-600 dark:text-gray-300">
-              Clusters by complaint count
+        <div className="w-full lg:w-72 flex flex-col gap-3 glass-panel p-3 animate-fade-in-up">
+          <div className="flex items-center gap-2 px-1 border-b border-gray-200/50 dark:border-gray-700/50 pb-2 mb-1">
+            <List size={15} className="text-indigo-500" />
+            <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-200">
+              Area-wise Critical Clusters
             </span>
           </div>
 
@@ -251,10 +253,10 @@ export default function Maps() {
                   key={c.cluster_id}
                   onClick={() => setSelectedId(isSelected ? null : c.cluster_id)}
                   className={`
-                    w-full text-left rounded-xl border p-3 transition-all
+                    w-full text-left rounded-xl p-3 transition-all
                     ${isSelected
-                      ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
-                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
+                      ? 'border border-indigo-400 bg-indigo-50/80 dark:bg-indigo-900/40 shadow-md'
+                      : 'border border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 hover:bg-white/80 dark:hover:bg-gray-800/80 hover:shadow-sm'
                     }
                   `}
                 >

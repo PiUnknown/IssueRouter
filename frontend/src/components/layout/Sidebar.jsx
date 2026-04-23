@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import IssueRouterLogo from '../../assets/IssueRouter.png'
+import IssueRouterLogo from '../../assets/issuerouter-logo.svg'
 import {
     LayoutDashboard,
     BarChart2,
@@ -41,7 +41,7 @@ export default function Sidebar({ darkMode, toggleDarkMode, isOpen, onClose }) {
             <aside
                 className={`
           fixed top-0 left-0 h-full z-30 w-60 flex flex-col
-          bg-indigo-900 text-white
+          bg-[#0a0f1c]/95 backdrop-blur-3xl border-r border-white/5 shadow-[4px_0_24px_rgba(0,0,0,0.4)] text-white
           transition-transform duration-300 ease-in-out
           lg:static lg:translate-x-0 lg:z-auto
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}

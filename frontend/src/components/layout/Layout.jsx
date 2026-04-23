@@ -18,7 +18,7 @@ export default function Layout() {
                 onClose={() => setSidebarOpen(false)}
             />
 
-            <div className="flex flex-col flex-1 min-w-0 overflow-hidden bg-gray-50 dark:bg-gray-900">
+            <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
 
                 {/* Topbar — shown on all screen sizes.
             On mobile it also receives the open handler for the hamburger. */}
