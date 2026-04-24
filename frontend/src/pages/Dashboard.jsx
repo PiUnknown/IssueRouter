@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react'
 import useClusters from '../hooks/useClusters'
+import { useIssues } from '../context/IssueContext'
 import ClusterCard from '../components/ui/ClusterCard'
 import FilterBar from '../components/ui/FilterBar'
+import { Layers, Clock, Wrench, CheckCircle2 } from 'lucide-react'
 
 const STATUS_FILTERS = [
   { key: 'all', label: 'All' },
@@ -12,7 +14,7 @@ const STATUS_FILTERS = [
 
 const DEFAULT_FILTERS = {
   search: '',
-  minCount: 0,
+  type: '',
   location: '',
   department: '',
 }
@@ -44,12 +46,15 @@ function SkeletonCard() {
 }
 
 export default function Dashboard() {
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('pending')
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE)
   const [expandedId, setExpandedId] = useState(null)
 
-  // Build API filter params
+  // Context — live issues (with assignment / discard updates)
+  const { issues: contextIssues, discarded } = useIssues()
+
+  // API fetch still used for server-side filtering (search, dept)
   const apiFilters = useMemo(() => {
     const f = {}
     if (statusFilter !== 'all') f.status = statusFilter
@@ -58,16 +63,37 @@ export default function Dashboard() {
     return f
   }, [statusFilter, filters.search, filters.department])
 
-  const { clusters, loading, error } = useClusters(apiFilters)
+  const { clusters: apiClusters, loading, error } = useClusters(apiFilters)
 
-  // Client-side: min complaint count + location substring (not in API params)
+  // Merge: use context status overrides, exclude discarded
+  const clusters = useMemo(() => {
+    return apiClusters
+      .filter(c => !discarded.has(c.cluster_id))
+      .map(c => {
+        const live = contextIssues.find(ci => ci.cluster_id === c.cluster_id)
+        return live ? { ...c, status: live.status } : c
+      })
+      // Re-apply status filter after merging live status
+      .filter(c => statusFilter === 'all' || c.status === statusFilter)
+  }, [apiClusters, contextIssues, discarded, statusFilter])
+
+  // Client-side: complaint type + location exact match
   const filtered = useMemo(() => {
     return clusters.filter((c) => {
-      if (filters.minCount && c.complaint_count < filters.minCount) return false
-      if (filters.location && !c.location.includes(filters.location)) return false
+      if (filters.type && c.problem.split('—')[0].trim() !== filters.type) return false
+      if (filters.location && c.location !== filters.location) return false
       return true
     })
-  }, [clusters, filters.minCount, filters.location])
+  }, [clusters, filters.type, filters.location])
+
+  // Counts from full context issues (minus discarded)
+  const liveClusters = contextIssues.filter(c => !discarded.has(c.cluster_id))
+  const counts = useMemo(() => ({
+    total:      liveClusters.length,
+    pending:    liveClusters.filter(c => c.status === 'pending').length,
+    inprogress: liveClusters.filter(c => c.status === 'inprogress').length,
+    resolved:   liveClusters.filter(c => c.status === 'resolved').length,
+  }), [liveClusters])
 
   const handleFiltersChange = (newFilters) => {
     setFilters(newFilters)
@@ -83,13 +109,6 @@ export default function Dashboard() {
   const hasMore = visibleCount < filtered.length
   const remaining = filtered.length - visibleCount
 
-  const counts = useMemo(() => ({
-    total:      clusters.length,
-    pending:    clusters.filter((c) => c.status === 'pending').length,
-    inprogress: clusters.filter((c) => c.status === 'inprogress').length,
-    resolved:   clusters.filter((c) => c.status === 'resolved').length,
-  }), [clusters])
-
   return (
     <div className="space-y-5">
 
@@ -97,7 +116,7 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
         <div className="flex flex-col">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
-            Priority Lists
+            Priority Complains
           </h2>
           <p className="text-[13px] font-medium text-gray-500 dark:text-gray-400 mt-1 max-w-2xl">
             Showing critical complaints of people that need immediate attention.
@@ -117,7 +136,7 @@ export default function Dashboard() {
             sub: 'active complaints',
             valueColor: 'from-gray-700 to-gray-500 dark:from-white dark:to-gray-400',
             iconBg: 'bg-gray-100 dark:bg-gray-700',
-            icon: '🗂️',
+            icon: <Layers className="w-5 h-5 text-gray-600 dark:text-gray-300" />,
           },
           {
             label: 'Pending',
@@ -125,7 +144,7 @@ export default function Dashboard() {
             sub: 'awaiting action',
             valueColor: 'from-amber-600 to-orange-500',
             iconBg: 'bg-amber-50 dark:bg-amber-900/30',
-            icon: '⏳',
+            icon: <Clock className="w-5 h-5 text-amber-600 dark:text-amber-500" />,
           },
           {
             label: 'In Progress',
@@ -133,7 +152,7 @@ export default function Dashboard() {
             sub: 'being handled',
             valueColor: 'from-blue-600 to-indigo-500',
             iconBg: 'bg-blue-50 dark:bg-blue-900/30',
-            icon: '🔧',
+            icon: <Wrench className="w-5 h-5 text-blue-600 dark:text-blue-500" />,
           },
           {
             label: 'Resolved',
@@ -141,7 +160,7 @@ export default function Dashboard() {
             sub: 'successfully closed',
             valueColor: 'from-green-600 to-emerald-500',
             iconBg: 'bg-green-50 dark:bg-green-900/30',
-            icon: '✅',
+            icon: <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-500" />,
           },
         ].map(({ label, value, sub, valueColor, iconBg, icon }, i) => (
           <div

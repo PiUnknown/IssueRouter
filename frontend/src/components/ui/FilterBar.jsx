@@ -2,18 +2,11 @@ import { Search, X } from 'lucide-react'
 import { clusters } from '../../data/Clusters'
 import { useMemo } from 'react'
 
-// Derive unique locations and departments from the data itself
-const LOCATIONS = [...new Set(clusters.map((c) => c.location.split(',')[1]?.trim()).filter(Boolean))].sort()
+// Derive unique locations, departments and types from the data itself
+const LOCATIONS = [...new Set(clusters.map((c) => c.location))].sort()
 const DEPARTMENTS = [...new Set(clusters.map((c) => c.department))].sort()
+const TYPES = [...new Set(clusters.map((c) => c.problem.split('—')[0].trim()))].sort()
 
-const COUNT_OPTIONS = [
-    { label: 'Any count', value: 0 },
-    { label: '25+  complaints', value: 25 },
-    { label: '50+  complaints', value: 50 },
-    { label: '100+ complaints', value: 100 },
-    { label: '200+ complaints', value: 200 },
-    { label: '300+ complaints', value: 300 },
-]
 
 function SelectWrapper({ children }) {
     return (
@@ -31,21 +24,21 @@ function SelectWrapper({ children }) {
 }
 
 export default function FilterBar({ filters, onChange }) {
-    const { search, minCount, location, department } = filters
+    const { search, type, location, department } = filters
 
     const activeChips = useMemo(() => {
         const chips = []
         if (search) chips.push({ label: `"${search}"`, key: 'search' })
-        if (minCount) chips.push({ label: `${minCount}+ complaints`, key: 'minCount' })
+        if (type) chips.push({ label: type, key: 'type' })
         if (location) chips.push({ label: location, key: 'location' })
         if (department) chips.push({ label: department, key: 'department' })
         return chips
-    }, [search, minCount, location, department])
+    }, [search, type, location, department])
 
     const set = (key, value) => onChange({ ...filters, [key]: value })
 
     const reset = () =>
-        onChange({ search: '', minCount: 0, location: '', department: '' })
+        onChange({ search: '', type: '', location: '', department: '' })
 
     const baseSelect = `
     w-full h-[34px] pl-2.5 pr-7 text-[12px] appearance-none
@@ -90,19 +83,20 @@ export default function FilterBar({ filters, onChange }) {
                     </div>
                 </div>
 
-                {/* Complaint count */}
+                {/* Complaint type */}
                 <div className="flex flex-col gap-1 min-w-[140px]">
                     <span className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                        People complaining
+                        Complaint Type
                     </span>
                     <SelectWrapper>
                         <select
-                            value={minCount}
-                            onChange={(e) => set('minCount', Number(e.target.value))}
+                            value={type}
+                            onChange={(e) => set('type', e.target.value)}
                             className={baseSelect}
                         >
-                            {COUNT_OPTIONS.map(({ label, value }) => (
-                                <option key={value} value={value}>{label}</option>
+                            <option value="">All types</option>
+                            {TYPES.map((t) => (
+                                <option key={t} value={t}>{t}</option>
                             ))}
                         </select>
                     </SelectWrapper>
@@ -173,7 +167,7 @@ export default function FilterBar({ filters, onChange }) {
                         >
                             {label}
                             <button
-                                onClick={() => set(key, key === 'minCount' ? 0 : '')}
+                                onClick={() => set(key, '')}
                                 className="hover:text-indigo-900 dark:hover:text-indigo-100 transition-colors"
                             >
                                 <X size={11} />

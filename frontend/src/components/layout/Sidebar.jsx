@@ -12,12 +12,14 @@ import {
     Moon,
     X,
     ChevronRight,
+    TrendingUp,
 } from 'lucide-react'
 
 const mainNav = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Analytics', path: '/analytics', icon: BarChart2, badge: 'New' },
     { label: 'Maps', path: '/maps', icon: Map },
+    { label: 'Progress', path: '/progress', icon: TrendingUp },
 ]
 
 const accountNav = [
