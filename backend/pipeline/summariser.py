@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from groq import Groq
 
-client = Groq()  # reads GROQ_API_KEY from .env automatically
+client = Groq(api_key="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")
 
 # Cache path — fallback if API is down during demo
 CACHE_PATH = Path(__file__).parent.parent / "cache" / "summaries.json"

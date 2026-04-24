@@ -14,6 +14,34 @@ import sys
 import random
 from datetime import datetime, timedelta
 from pathlib import Path
+from pipeline.main import process_post, load_all_models
+
+TWEETS_PATH = Path(__file__).parent / "ingestion" / "tweets.json"
+
+def run():
+    # Load models once
+    load_all_models()
+
+    # Load tweets
+    if not TWEETS_PATH.exists():
+        print("[seed] ERROR: tweets.json not found.")
+        return
+
+    tweets = json.loads(TWEETS_PATH.read_text())
+    print(f"\n[seed] Processing {len(tweets)} tweets...\n")
+    print("-" * 90)
+
+    results = []
+    for i, tweet in enumerate(tweets):
+        try:
+            result = process_post(tweet)
+            results.append(result)
+            print(
+                f"[{i+1:02}] @{result['username']:<25} "
+                f"| {result['category']:<15} "
+                f"| {result['urgency']:<8} "
+                f"| {result['department']:<15} "
+                f"| loc: {result['location'] or 'N/A'}"
 
 # Allow running from the backend/ directory
 sys.path.insert(0, str(Path(__file__).parent))
