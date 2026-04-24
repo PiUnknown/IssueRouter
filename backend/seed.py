@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 from pipeline.main import process_post, load_all_models
 
-TWEETS_PATH = Path(__file__).parent / "tweets.json"
+TWEETS_PATH = Path(__file__).parent / "ingestion" / "tweets.json"
 
 def run():
     # Load models once
