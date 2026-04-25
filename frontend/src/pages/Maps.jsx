@@ -136,7 +136,7 @@ function LeafletMap({ clusters, mode }) {
 
 // ── Main page ─────────────────────────────────────────────────
 export default function Maps() {
-  const [mode, setMode]           = useState('pins')
+  const [mode, setMode]           = useState('both')
   const [scriptsReady, setReady]  = useState(false)
   const [selectedId, setSelected] = useState(null)
 
