@@ -22,31 +22,33 @@ Government departments, city administrations, and public institutions are drowni
 - **Text classification** extracts structured category from free-form text
 - **Named Entity Recognition** pulls location and department names automatically
 - **Urgency detection** identifies safety-critical complaints without manual review
+- **Semantic clustering** groups duplicate/related complaints into single actionable clusters
 - **Summarization** standardizes messy citizen language into actionable summaries
-- This 4-5 step pipeline cannot be solved with rules alone—it requires ML
+- This 5-step pipeline cannot be solved with rules alone—it requires ML
 
 ---
 
 ## 2. MVP Scope (Hackathon-Optimized)
 
 **What IS Built (Scope):**
-1. ✅ Real-time X post ingestion via public API (search for `#complaints_gov` hashtag)
-2. ✅ ML pipeline: 
-   - Multi-class text classification (5–7 categories: Infrastructure, Water, Sanitation, Health, Safety, Other)
-   - NER for location extraction
-   - Urgency scoring (Low/Medium/High)
-   - LLM-based summary generation
+1. ✅ Real-time X post ingestion via Tweepy FilteredStream (search for `#complaints_gov`); mock replay for dev/demo
+2. ✅ ML pipeline:
+   - Zero-shot text classification (6 categories: Infrastructure, Water, Sanitation, Health, Safety, Other) via BART
+   - NER for location extraction — spaCy + Indian locality gazetteer
+   - Urgency scoring (Low/Medium/High) — hybrid keyword rules + retweet-boost
+   - Semantic clustering — sentence-transformers groups similar complaints
+   - LLM-based summary generation — Groq API (free tier)
 3. ✅ SQLite database storing complaints with metadata
-4. ✅ React admin dashboard showing all triage results
-5. ✅ Department routing suggestion (deterministic rule-based)
-6. ✅ Complaint detail view with original X post link
+4. ✅ React admin dashboard — dark-themed, priority-ranked cluster cards with expand panels
+5. ✅ Department routing suggestion (deterministic rule-based: category → department)
+6. ✅ Officer actions: Assign / Resolve / Escalate / Export Brief
 
 **What is EXCLUDED (Out of Scope):**
 - ❌ Closed-loop feedback (citizens don't see status updates in this MVP)
 - ❌ Multi-language support
 - ❌ Real email routing to departments (show suggestions only)
 - ❌ User authentication (public dashboard)
-- ❌ Fine-tuned models (use pre-trained only)
+- ❌ Fine-tuned models (zero-shot + pre-trained only)
 - ❌ Mobile app
 
 **The "Wow Factor" Demo Moment:**
@@ -55,6 +57,7 @@ Show judges a real X post like *"Broken streetlight on Main St, happens every ni
 - **Category:** Infrastructure | **Urgency:** High | **Department:** PWD | **Location:** Main St
 - Clean summary shown in dashboard
 - Original X post linked
+- Cluster card shows if other similar complaints were grouped together
 Repeat with 2–3 more examples in 60 seconds. Judges see: "This could save hours of work per day."
 
 ---
@@ -70,30 +73,31 @@ Repeat with 2–3 more examples in 60 seconds. Judges see: "This could save hour
 
 ### System Processing:
 ```
-4. Scheduler (runs every 5 min): Query X API for latest #complaints_gov posts
+4. Tweepy FilteredStream: ingests #complaints_gov posts live
 5. For each new post:
-   a. Extract text, author, timestamp, media (if any)
+   a. Extract text, author, timestamp, retweet count
    b. Run through ML pipeline:
-      - Classification model → "Infrastructure"
-      - NER model → Extract "Area 51"
-      - Urgency model → "High" (keywords: "ASAP", "blocking", "traffic")
-      - LLM summarization → "Dangerous pothole on main road, Area 51"
-   c. Rule-based routing → "Public Works Department"
-   d. Store in DB with confidence scores
-6. Dashboard auto-refreshes (WebSocket or polling)
+      - BART zero-shot classification → "Infrastructure"
+      - spaCy + EntityRuler NER → Extract "Area 51"
+      - Urgency scorer → "High" (keywords: "ASAP", "blocking", "traffic")
+      - sentence-transformers → cluster with similar pothole complaints
+      - Groq LLM → "Dangerous pothole on main road, Area 51 — immediate action needed"
+   c. Urgency rank boosted if retweet_count > threshold
+   d. Rule-based routing → "Public Works Department"
+   e. Store in DB; dashboard cluster card updated
+6. Dashboard auto-refreshes (polling or WebSocket)
 ```
 
 ### Admin Side (Government):
 ```
-7. Dashboard loads → See real-time list of complaints
-8. Click any complaint → See:
-   - Full X post (embedded)
+7. Dashboard loads → See priority-ranked cluster cards (not a raw tweet feed)
+8. Click any cluster card → See:
+   - Grouped complaints (volume × social reach = rank)
    - Extracted metadata (category, urgency, location, dept)
-   - Suggested summary
-   - Confidence score
-9. Option to:
-   - Mark as "Forwarded"
-   - View complaint timeline
+   - AI-generated one-line officer brief
+   - Original X post links
+9. Officer actions:
+   - Assign / Resolve / Escalate / Export Brief
    - Filter by urgency/category
 ```
 
@@ -103,31 +107,32 @@ Repeat with 2–3 more examples in 60 seconds. Judges see: "This could save hour
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    X PUBLIC API                               │
-│           (Search posts with #complaints_gov)               │
+│                    X PUBLIC API                              │
+│    Tweepy FilteredStream (#complaints_gov) / mock replay    │
 └────────────────────────┬────────────────────────────────────┘
                          │
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              BACKEND (FastAPI / Node.js)                    │
+│              BACKEND (FastAPI + Python)                      │
 │                                                              │
-│  1. Scheduler (APScheduler / node-cron)                     │
-│     └─ Fetches new X posts every 5 min                      │
+│  1. Ingestion Layer                                          │
+│     └─ Tweepy FilteredStream → raw post → DB                │
 │                                                              │
-│  2. ML Pipeline Runner                                      │
-│     ├─ Classification (scikit-learn / Hugging Face)        │
-│     ├─ NER (spaCy or Hugging Face)                         │
-│     ├─ Urgency Scorer (hybrid: rules + ML)                 │
-│     └─ LLM Summarizer (OpenAI API or open-source)          │
+│  2. ML Pipeline (Dev 2 — pipeline/ai-migration-fixes)        │
+│     ├─ Classification: BART zero-shot (bart-large-mnli)     │
+│     ├─ NER: spaCy en_core_web_sm + EntityRuler gazetteer    │
+│     ├─ Urgency: Hybrid keyword rules + retweet-boost        │
+│     ├─ Clustering: sentence-transformers all-MiniLM-L6-v2   │
+│     └─ Summarisation: Groq API (llama3-8b-8192)             │
 │                                                              │
-│  3. Rooting Logic (Deterministic Rules)                     │
-│     └─ category → department mapping                        │
+│  3. Routing Logic (Deterministic Rules)                      │
+│     └─ category → department mapping                         │
 │                                                              │
-│  4. REST API Endpoints                                      │
-│     ├─ GET /api/complaints (all, filtered)                │
-│     ├─ GET /api/complaints/:id (detail)                   │
-│     ├─ POST /api/complaints/:id/status (mark processed)   │
-│     └─ GET /api/stats (dashboard metrics)                 │
+│  4. REST API Endpoints                                       │
+│     ├─ GET /api/complaints (all, filtered)                  │
+│     ├─ GET /api/complaints/:id (detail)                     │
+│     ├─ POST /api/complaints/:id/status (mark processed)     │
+│     └─ GET /api/stats (dashboard metrics)                   │
 └──────────────────┬──────────────────────────────────────────┘
                    │
                    ▼
@@ -141,9 +146,12 @@ Repeat with 2–3 more examples in 60 seconds. Judges see: "This could save hour
         │ - category           │
         │ - location           │
         │ - urgency            │
+        │ - retweet_count      │
+        │ - cluster_id         │
         │ - department         │
         │ - summary            │
         │ - confidence_score   │
+        │ - priority_rank      │
         │ - created_at         │
         └──────────────────────┘
                    ▲
@@ -154,147 +162,181 @@ Repeat with 2–3 more examples in 60 seconds. Judges see: "This could save hour
    ┌─────────────┐   ┌──────────────────┐
    │  React SPA  │   │  WebSocket Feed  │
    │ (Dashboard) │   │  (Live updates)  │
+   │ Dark theme  │   │                  │
+   │ Cluster     │   │                  │
+   │ Cards +     │   │                  │
+   │ Expand Panel│   │                  │
    └─────────────┘   └──────────────────┘
 ```
 
 **Key Flows:**
-1. **Ingestion:** X API → FastAPI endpoint → Store raw post in DB
-2. **Processing:** Background job runs ML pipeline → Update complaint record with metadata
-3. **Display:** React fetches from API → Dashboard renders complaint list with filtering
-4. **Live Updates:** WebSocket pushes new complaints to open dashboards in real-time
+1. **Ingestion:** Tweepy FilteredStream → FastAPI → Store raw post in DB
+2. **Processing:** Background pipeline runs BART → spaCy → urgency → cluster → Groq → update DB
+3. **Display:** React fetches from API → Dashboard renders ranked cluster cards
+4. **Live Updates:** WebSocket/polling pushes new clusters to open dashboards
 
 ---
 
-## 5. AI/ML Design (Very Concrete)
+## 5. AI/ML Design (Confirmed Stack)
 
 ### A. Text Classification (Category Assignment)
 
 **Problem:** Classify "Potholes on Main Street" → Infrastructure
 
-**Model Choice:**
-- **Library:** scikit-learn + TfidfVectorizer + LogisticRegression
-- **Why:** Lightweight, no GPU needed, ~90% accuracy for this domain
-- **Alternative:** Hugging Face DistilBERT (if you want 95%+ accuracy, slightly slower)
+**Model Choice (confirmed):**
+- **Model:** `facebook/bart-large-mnli` via Hugging Face zero-shot pipeline
+- **Why:** No training data required, strong out-of-the-box accuracy for civic complaint categories, CPU-friendly for demo
 
 **Implementation:**
 ```python
-# Training (mock data for MVP)
-categories = {
-    "Infrastructure": ["pothole", "street", "pavement", "road", "bridge", ...],
-    "Water": ["water", "tap", "leak", "pipe", "supply", ...],
-    "Health": ["clinic", "hospital", "disease", "sick", ...],
-    # ... etc (5-7 categories)
-}
+from transformers import pipeline
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
+classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
-vectorizer = TfidfVectorizer(max_features=500)
-classifier = LogisticRegression()
+candidate_labels = ["Infrastructure", "Water", "Sanitation", "Health", "Safety", "Other"]
 
-# Fit on training data
-# At runtime: predict(complaint_text) → category + confidence
+result = classifier(complaint_text, candidate_labels)
+category = result["labels"][0]          # top prediction
+confidence = result["scores"][0]        # confidence score
 ```
 
-**Confidence Threshold:** Only show category if confidence > 0.6; otherwise flag as "Unclear"
+**Confidence Threshold:** Only show category if confidence > 0.6; otherwise flag as "Unclear / Manual Review"
 
 ---
 
 ### B. Named Entity Recognition (Location Extraction)
 
-**Problem:** Extract "Main Street" or "Sector 5" from "Potholes on Main Street near mosque"
+**Problem:** Extract "Main Street" or "Sector 5" from "Potholes on Main Street near mosque" — including informal Indian locality names
 
-**Model Choice:**
-- **Library:** spaCy (pre-trained `en_core_web_sm`) + custom training
-- **Why:** Fast, accurate for locations, zero-setup for basic use
+**Model Choice (confirmed):**
+- **Library:** spaCy `en_core_web_sm` + custom `EntityRuler` with an Indian locality gazetteer
+- **Why:** Fast, zero GPU, custom gazetteer handles informal place names that generic NER misses (e.g., "Gurugram", "Sector 56", landmark names)
 
 **Implementation:**
 ```python
 import spacy
+from spacy.pipeline import EntityRuler
 
 nlp = spacy.load("en_core_web_sm")
-doc = nlp("Potholes on Main Street")
-locations = [ent.text for ent in doc.ents if ent.label_ == "GPE"]
-# Output: ["Main Street"]
+
+# Custom gazetteer for Indian localities
+ruler = nlp.add_pipe("entity_ruler", before="ner")
+patterns = [
+    {"label": "GPE", "pattern": "Gurugram"},
+    {"label": "GPE", "pattern": "Sector 56"},
+    {"label": "LOC", "pattern": "near the mosque"},
+    # ... extend with local landmark patterns
+]
+ruler.add_patterns(patterns)
+
+doc = nlp("Potholes near the mosque in Sector 56")
+locations = [ent.text for ent in doc.ents if ent.label_ in ("GPE", "LOC")]
+# Output: ["the mosque", "Sector 56"]
 ```
 
-**Limitation:** spaCy works for named entities; for informal locations like "near the mosque" you need:
-- **Fallback Rule:** Extract nouns (using NLTK POS tagging)
-- **Hybrid:** Combine spaCy NER + regex for street patterns
+**Fallback:** Regex for numbered sectors (`Sector \d+`) and street patterns (`\d+ .*?(Street|Road|Marg)`)
 
 ---
 
-### C. Summarization (Standardized Citizen Voice)
+### C. Urgency Scoring (Hybrid: Rules + Retweet Boost)
 
-**Problem:** Convert messy text into clean, actionable summary
+**Problem:** Classify urgency and amplify based on social reach
 
-**Model Choice:**
-- **Primary:** OpenAI API (if API key available) — 30 seconds, high quality
-- **Fallback:** Hugging Face Pegasus summarization (local, slower, but free)
-- **Lightweight Fallback:** Extractive summarization (pick top 2 sentences)
+**Approach (confirmed): Hybrid keyword rules + retweet-count boost**
 
-**Implementation:**
 ```python
-# Option 1: OpenAI (hackathon-friendly)
-import openai
-openai.api_key = YOUR_KEY
-response = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo",
-    messages=[{
-        "role": "system",
-        "content": "Summarize citizen complaints in 1 sentence, include location and issue."
-    }, {
-        "role": "user",
-        "content": complaint_text
-    }]
-)
-summary = response['choices'][0]['message']['content']
+HIGH_KEYWORDS = {"fatal", "death", "injury", "emergency", "asap", "danger", "critical",
+                 "blocked", "flooding", "accident", "immediate", "please fix", "no water"}
+MEDIUM_KEYWORDS = {"broken", "issue", "problem", "not working", "needed", "days"}
 
-# Option 2: Hugging Face (free)
-from transformers import pipeline
-summarizer = pipeline("summarization")
-summary = summarizer(complaint_text, max_length=50)[0]['summary_text']
-```
+RETWEET_BOOST_THRESHOLD = 50   # retweets above this → bump urgency one level
 
-**Prompt Engineering (Critical):**
-```
-System: "You are a government intake clerk. Convert citizen complaints into clear, structured summaries. 
-Focus on: issue type, location, impact. Keep to 1 sentence. Be professional."
-```
-
----
-
-### D. Urgency Detection (Rules + Light ML)
-
-**Problem:** Classify "Broken streetlight on Main St, happens every night, nobody fixes it!" as High urgency
-
-**Approach: Hybrid (Rule + ML)**
-
-**Rules (70% of accuracy):**
-```python
-HIGH_KEYWORDS = {"fatal", "death", "injury", "emergency", "asap", "danger", "critical", 
-                 "blocked", "flooding", "accident", "immediate"}
-MEDIUM_KEYWORDS = {"broken", "issue", "problem", "not working", "needed"}
-
-def urgency_from_rules(text):
+def compute_urgency(text: str, retweet_count: int) -> str:
     text_lower = text.lower()
     if any(kw in text_lower for kw in HIGH_KEYWORDS):
-        return "High"
+        base = "High"
     elif any(kw in text_lower for kw in MEDIUM_KEYWORDS):
-        return "Medium"
-    return "Low"
+        base = "Medium"
+    else:
+        base = "Low"
+
+    # Retweet boost: social signal amplifies priority
+    if retweet_count >= RETWEET_BOOST_THRESHOLD:
+        if base == "Low":
+            base = "Medium"
+        elif base == "Medium":
+            base = "High"
+
+    return base
 ```
 
-**ML Boost (if time permits):**
-Train a simple logistic regression on labeled complaints (collect during dev) to refine confidence.
-
-**Final Score:**
+**Priority Rank Formula:**
 ```python
-rule_urgency = urgency_from_rules(text)
-ml_confidence = ml_model.predict_proba(text)[0]
+priority_score = complaint_volume_in_cluster * (1 + log(1 + total_retweets))
+```
+Cluster cards sorted descending by priority_score → officers always see highest-impact issues first.
 
-# If ML confident (>0.75), use ML; else use rules
-final_urgency = ml_urgency if ml_confidence > 0.75 else rule_urgency
+---
+
+### D. Semantic Clustering
+
+**Problem:** Group "Pothole on MG Road" and "Bad road near MG Road market" into one cluster rather than surfacing as separate complaints
+
+**Model Choice (confirmed):** `sentence-transformers/all-MiniLM-L6-v2`
+
+```python
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+def cluster_complaints(texts: list[str], threshold: float = 0.75) -> list[int]:
+    embeddings = model.encode(texts)
+    sim_matrix = cosine_similarity(embeddings)
+    # Simple greedy clustering: assign to existing cluster if sim > threshold
+    clusters = [-1] * len(texts)
+    cluster_id = 0
+    for i in range(len(texts)):
+        if clusters[i] == -1:
+            clusters[i] = cluster_id
+            for j in range(i + 1, len(texts)):
+                if sim_matrix[i][j] >= threshold:
+                    clusters[j] = cluster_id
+            cluster_id += 1
+    return clusters
+```
+
+---
+
+### E. Summarisation (LLM — Groq API)
+
+**Model Choice (confirmed):** Groq API, `llama3-8b-8192` — free tier, no credit card required
+
+```python
+from groq import Groq
+
+client = Groq()  # reads GROQ_API_KEY from env
+
+def summarise_cluster(complaints: list[str]) -> str:
+    combined = "\n".join(f"- {c}" for c in complaints)
+    response = client.chat.completions.create(
+        model="llama3-8b-8192",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a government intake clerk. Given a cluster of citizen complaints, "
+                    "write a single clear sentence for a government officer. "
+                    "Include: issue type, location (if available), severity, and recommended action. "
+                    "Be direct and professional. No preamble."
+                )
+            },
+            {"role": "user", "content": combined}
+        ],
+        max_tokens=120
+    )
+    return response.choices[0].message.content.strip()
 ```
 
 ---
@@ -303,212 +345,182 @@ final_urgency = ml_urgency if ml_confidence > 0.75 else rule_urgency
 
 ### Data Requirements:
 
-**For Training (Classified Complaints):**
-- ~50–100 manually labeled complaints (category, location, urgency)
-- Format: `[{"text": "...", "category": "...", "location": "...", "urgency": "..."}]`
-
 **For Inference (Real X Posts):**
-- Raw X post data: `{"id", "text", "author", "created_at", "url"}`
+- Raw X post data: `{"id", "text", "author", "created_at", "retweet_count", "url"}`
 
-### Mock Data Generation (For Hackathon):
+**No training data required** — BART zero-shot classification eliminates the need to collect and label training samples for classification.
 
-**Seed Data (Example):**
+### Mock Data (For Dev / Demo Replay):
+
 ```json
 [
   {
-    "text": "Pothole on Main Street near mosque, traffic accident risk!",
+    "text": "Pothole on MG Road near mosque, traffic accident risk! #complaints_gov",
+    "retweet_count": 87,
     "category": "Infrastructure",
-    "location": "Main Street",
+    "location": "MG Road",
     "urgency": "High",
-    "department": "Public Works"
+    "department": "Public Works Department"
   },
   {
-    "text": "Water tap not working in Sector 5 for 3 days",
+    "text": "Water tap not working in Sector 56 for 3 days #complaints_gov",
+    "retweet_count": 12,
     "category": "Water",
-    "location": "Sector 5",
+    "location": "Sector 56",
     "urgency": "Medium",
     "department": "Water Works"
   },
   {
-    "text": "Streetlight broken outside school",
+    "text": "Streetlight broken outside Govt School, Gurugram #complaints_gov",
+    "retweet_count": 62,
     "category": "Infrastructure",
-    "location": "School area",
+    "location": "Gurugram",
     "urgency": "High",
-    "department": "Public Works"
+    "department": "Public Works Department"
   }
 ]
 ```
 
-**Synthetic Data Pipeline:**
-```python
-# Use templates to quickly generate training data
-templates = {
-    "Infrastructure": [
-        "Pothole on {location} causing accidents",
-        "Broken {asset} at {location}",
-        "Road damaged on {location}"
-    ],
-    # ... etc
-}
-
-locations = ["Main St", "Sector 5", "Downtown", "Market Road", ...]
-def generate_training_data(n=100):
-    data = []
-    for _ in range(n):
-        category = random.choice(list(templates.keys()))
-        template = random.choice(templates[category])
-        location = random.choice(locations)
-        text = template.format(location=location)
-        data.append({
-            "text": text,
-            "category": category,
-            "location": location,
-            "urgency": "High" if "accident" in text else "Medium"
-        })
-    return data
-```
-
 ---
 
-## 7. Tech Stack (Specific, Opinionated)
+## 7. Tech Stack (Confirmed)
 
 | Component | Choice | Why |
 |-----------|--------|-----|
 | **Backend Framework** | FastAPI (Python) | Fast, async, built-in API docs, ideal for ML pipelines |
-| **ML/NLP Stack** | scikit-learn + spaCy + Hugging Face transformers | Lightweight, no GPU needed, production-ready |
-| **LLM (Summarization)** | OpenAI API (GPT-3.5-turbo) or free: Hugging Face Pegasus | OpenAI = quality; Hugging Face = free but slower |
-| **Database** | SQLite (MVP) → PostgreSQL (production) | SQLite: zero setup for hackathon; scales to 1M records |
-| **Frontend** | React + TypeScript + SWR | Fast iteration, real-time data fetching with SWR |
-| **Styling** | Tailwind CSS | Rapid prototyping, pre-built components |
-| **X API Integration** | tweepy or x-python library | Standard, well-documented |
-| **Job Scheduling** | APScheduler (Python) | Lightweight, runs background jobs for post ingestion |
-| **Real-Time Updates** | WebSocket (python-socketio) | Live dashboard updates without refresh |
-| **Hosting (Optional)** | Vercel (frontend) + Railway/Render (backend) | Free tier, simple deploy, works for hackathon |
+| **Classification** | `facebook/bart-large-mnli` (zero-shot) | No training data needed; strong civic domain performance |
+| **NER** | spaCy `en_core_web_sm` + custom EntityRuler | Fast, Indian-locale aware via custom gazetteer |
+| **Urgency Scoring** | Hybrid keyword rules + retweet-count boost | Interpretable, fast, socially amplified |
+| **Clustering** | `sentence-transformers/all-MiniLM-L6-v2` | Lightweight, CPU-friendly, strong semantic similarity |
+| **LLM Summarisation** | Groq API — `llama3-8b-8192` | Free tier, no card, ~0.5s latency |
+| **Database** | SQLite (MVP) → PostgreSQL (production) | Zero setup for hackathon |
+| **Frontend** | React 18, Tailwind CSS, shadcn/ui, Recharts | Dark-themed, cluster card layout |
+| **X Ingestion** | Tweepy FilteredStream / mock replay | Standard; swap one flag for live vs. mock |
+| **Job Scheduling** | APScheduler (Python) | Lightweight background ingestion |
+| **Real-Time Updates** | WebSocket / polling | Live dashboard updates |
+| **Hosting (Optional)** | Vercel (frontend) + Railway/Render (backend) | Free tier, simple deploy |
 
 **Why NOT:**
+- ❌ OpenAI / Claude for summarisation — paid, card required; Groq free tier is sufficient
+- ❌ scikit-learn classifier — needs labelled training data; BART zero-shot eliminates this
 - ❌ Django: Too heavy for MVP
-- ❌ TensorFlow/PyTorch: Overkill for lightweight models
-- ❌ GraphQL: REST is simpler and faster to build
-- ❌ MongoDB: SQL is better for structured complaints data
+- ❌ MongoDB: SQL better for structured complaints data
 
 ---
 
 ## 8. Step-by-Step Build Plan
 
-### Phase 1: Foundation (Hours 1–4) — **Can be done in parallel by 2 people**
+### Phase 1: Foundation (Hours 1–4) — **Parallel**
 
-**Task 1a (Backend Dev):** Set up FastAPI, SQLite schema, and X API integration
+**Task 1a (Backend — Om/Dev 2):** FastAPI project, SQLite schema, X ingestion
 - Create FastAPI project structure
-- Define SQLite schema (complaints table with fields: id, x_post_id, text, category, location, urgency, summary, department, created_at)
-- Write X API client to fetch #complaints_gov posts
-- Create endpoint: `GET /api/complaints` (returns all complaints)
+- Define SQLite schema (add `retweet_count`, `cluster_id`, `priority_rank` fields)
+- Write Tweepy FilteredStream client + mock replay mode
+- `GET /api/complaints` endpoint
 
-**Task 1b (Frontend Dev):** Create React dashboard skeleton
-- Set up React + Tailwind
-- Build layout: Header + Sidebar + Main complaint list
-- Create complaint card component (mock data)
-- Set up routing (list view, detail view)
+**Task 1b (Frontend Dev):** React dashboard skeleton
+- Dark-themed layout: Header + cluster card list + expand panel
+- Mock data cards showing priority rank, category, urgency badge, location
+- Routing: list view → detail view
 
-**Deliverable:** Backend returns mock complaints; frontend displays them.
-
----
-
-### Phase 2: ML Pipeline (Hours 5–8) — **Serial, backend-focused**
-
-**Task 2:** Train and integrate ML models
-- Collect/generate 50–100 training samples (template-based)
-- Train scikit-learn text classifier → save model pickle
-- Train spaCy NER (or use pre-trained)
-- Set up summarization endpoint (OpenAI API or Hugging Face)
-- Create `/api/process` endpoint that takes raw text → returns classified/extracted output
-
-**Deliverable:** Hit `/api/process` with raw X post text → get back structured JSON (category, location, urgency, summary)
+**Deliverable:** Backend returns mock complaints; frontend displays ranked cluster cards.
 
 ---
 
-### Phase 3: Integration (Hours 9–12) — **Can be done in parallel**
+### Phase 2: ML Pipeline (Hours 5–8) — **Dev 2 owned (branch: pipeline/ai-migration-fixes)**
 
-**Task 3a (Backend):** Wire ML pipeline to ingestion
-- Modify X ingestion job to call `/api/process` for each post
-- Store ML results in DB
-- Add filtering endpoints: `/api/complaints?category=Infrastructure&urgency=High`
+**Status: ✅ Smoke-tested — all models load and process correctly**
 
-**Task 3b (Frontend):** Build interactive dashboard
-- Display complaints with real-time updates (WebSocket or polling)
-- Add filters (category, urgency, department)
-- Build detail view: show original X post + extracted metadata
-- Add status buttons (mark as "Forwarded")
+- BART zero-shot classification ✅
+- spaCy + EntityRuler NER ✅
+- Hybrid urgency scorer ✅
+- sentence-transformers clustering ✅
+- Groq summarisation ✅
+- `/api/process` endpoint: raw text + retweet_count → structured JSON
 
-**Deliverable:** End-to-end flow: X post → system processes → dashboard shows result
+**Deliverable:** Hit `/api/process` with raw X post → get back `{category, location, urgency, cluster_id, summary, priority_rank}`
 
 ---
 
-### Phase 4: Polish & Demo (Hours 13–24) — **Buffer time**
+### Phase 3: Integration (Hours 9–12) — **Parallel**
 
-**Task 4a:** Test with real X posts (if API quota allows)
-**Task 4b:** Refine urgency detection (collect misclassifications, adjust rules)
-**Task 4c:** Add charts/metrics to dashboard (complaints per category, urgency distribution)
-**Task 4d:** Write demo script and prepare examples
-**Task 4e:** Deploy (Vercel + Railway)
+**Task 3a (Backend):** Wire pipeline to ingestion
+- Ingestion job calls `/api/process` per post, stores results in DB
+- Filtering endpoints: `/api/complaints?category=Infrastructure&urgency=High`
+- Cluster aggregation endpoint: `/api/clusters` (ranked by priority score)
+
+**Task 3b (Frontend):** Interactive dashboard
+- Real-time cluster cards ranked by priority_score
+- Expand panel: grouped complaint tweets + officer brief + action buttons
+- Filters (category, urgency, department)
+- Assign / Resolve / Escalate / Export Brief actions
+
+**Deliverable:** Full end-to-end: X post → pipeline → ranked cluster card in dashboard
 
 ---
 
-### Parallelization Tips:
-- **Person A (Backend):** Tasks 1a → 2 → 3a
-- **Person B (Frontend):** Tasks 1b → 3b → polish
-- **Person C (If 3rd member):** Data generation + testing + demo preparation
+### Phase 4: Polish & Demo (Hours 13–24) — **Buffer**
+
+- Test with real X posts (mock replay if quota tight)
+- Tune EntityRuler gazetteer for Gurugram/local landmarks
+- Add metrics panel: total clusters, urgency distribution, avg processing time
+- Write demo script; prepare 3–4 example posts
+- Deploy (Vercel + Railway)
+- Merge `pipeline/ai-migration-fixes` → integration branch after stash resolution
+
+---
+
+### Parallelization:
+- **Om (Dev 2):** Pipeline code (done ✅) → Phase 3a integration → stash resolution → merge
+- **Frontend Dev:** Phase 1b → Phase 3b → polish
+- **Others:** Mock data prep, NER gazetteer expansion, demo script, testing
 
 ---
 
 ## 9. Demo Script (CRITICAL)
 
 ### Setup:
-- Have 3–4 real X posts with #complaints_gov ready (or fake them for control)
-- Dashboard running on one screen
-- Terminal showing API calls on second screen
+- Mock replay loaded with 10–15 pre-processed complaints
+- Dashboard open (dark theme, cluster cards visible)
+- Terminal showing live API calls on second screen
 
 ### Demo Flow (5 minutes):
 
 **Intro (30 sec):**
-> "Governments get thousands of complaints via email, calls, social media. The problem: they're messy, unstructured, and manually sorted. We built a system that scrapes citizen complaints from X, automatically categorizes them, extracts location, rates urgency, and routes them. Let me show you."
+> "Governments get thousands of complaints on X every day — potholes, water cuts, broken lights. The problem: no one systematically reads them. We built a system that ingests complaints automatically, runs them through an AI pipeline, and surfaces ranked action briefs to officers. Let me show you."
 
-**Demo Part 1: Real-Time Ingestion (1 min):**
-> "I'm going to post a complaint on X right now with #complaints_gov..."
-- **Post:** "Broken streetlight on Main Street. Kids can't walk to school safely. PLEASE FIX!"
-- Wait 10 seconds → Dashboard auto-updates
-- Show the new complaint appearing in the list
+**Demo Part 1: Ingestion (1 min):**
+> "I'll post a complaint on X right now with #complaints_gov..."
+- Post: "Broken streetlight on MG Road. Kids can't walk to school safely. PLEASE FIX!"
+- Wait ~10 seconds → cluster card appears or updates in dashboard
 
-**Demo Part 2: ML Extraction (2 min):**
+**Demo Part 2: AI Pipeline Output (2 min):**
 > "Watch what the system extracted automatically..."
-- Click complaint detail
+- Click cluster card → expand panel
 - Show:
-  - **Category:** Infrastructure (95% confidence)
-  - **Location:** Main Street (highlighted)
-  - **Urgency:** High (detected keywords: "broken", "safely", "PLEASE FIX")
-  - **Department:** Public Works
-  - **Summary:** "Unsafe streetlight outage near school on Main Street—immediate safety risk"
-  - **Link to original X post** ← judges click to verify it's real
+  - **Category:** Infrastructure (BART zero-shot)
+  - **Location:** MG Road (spaCy + EntityRuler)
+  - **Urgency:** High (keyword: "PLEASE FIX" + retweet boost)
+  - **Department:** Public Works Department
+  - **Officer Brief:** "Streetlight outage on MG Road near school — immediate safety risk, assign to PWD"
+  - **Cluster:** 2 similar complaints grouped → "12 retweets combined"
 
-**Demo Part 3: Batch Processing (1.5 min):**
-> "Let's show it scales. Here are 10 more complaints we processed..."
-- Show dashboard filtered by "High Urgency" → 3 complaints visible
-- Click each one, highlight different categories
-- Example 2:
-  - Post: "Water tap not working in Sector 5. No water for 2 days!"
-  - System → Category: Water, Urgency: High, Location: Sector 5, Department: Water Works
-- Example 3:
-  - Post: "Pothole. Its bad."
-  - System → Category: Infrastructure, Urgency: Medium, Location: (none extracted), Confidence: 0.65
+**Demo Part 3: Prioritization (1.5 min):**
+> "Officers don't see a raw tweet feed — they see ranked priorities."
+- Show cluster #1 (high retweet + high urgency)
+- Show cluster #2 (lower reach, Medium urgency)
+- Filter by "High Urgency" → 3 clusters
+- Click Assign on cluster #1 → status updates
 
 **Demo Part 4: Value (30 sec):**
-> "Instead of a clerk manually reading 10 complaints and filling out forms for 30 minutes, the system does it in 30 seconds. The government can now focus on solving problems, not sorting them."
+> "Instead of a clerk manually reading 200 tweets and guessing which department, the system ranks the top issues in under 2 seconds. Government can now focus on fixing problems, not finding them."
 
 ### Key Points:
-- ✅ Show **real data** (X posts, not mock)
-- ✅ Show **all 4 components working:** classification, NER, urgency, summarization
-- ✅ Show **confidence scores** (judges like seeing 0.87, not just "Infrastructure")
-- ✅ Show **speed** (complaints appear in dashboard in <5 seconds)
-- ✅ Show **accuracy** (correct categories, correct departments)
+- ✅ Show **ranked cluster cards**, not raw tweets — this is the differentiator
+- ✅ Show **retweet-boost effect** (explain why #1 card is #1)
+- ✅ Show **all 5 pipeline steps** working
+- ✅ Show **speed** (<2 sec end-to-end)
+- ✅ Have a "low confidence" example ready — show "Manual Review" flag honestly
 
 ---
 
@@ -518,29 +530,29 @@ def generate_training_data(n=100):
 
 | Metric | Target | How to Measure |
 |--------|--------|-----------------|
-| **Classification Accuracy** | >85% on 50 test complaints | Confusion matrix (scikit-learn) |
-| **Location Extraction** | >75% on test set | Manual spot-check 10 extractions |
-| **Urgency Detection** | >80% on test set | Compare rule vs. manually labeled |
-| **Summarization Quality** | Subjective but clear & actionable | Read 5 summaries, ask: "Would a clerk understand this?" |
-| **End-to-End Latency** | <5 sec from X post to dashboard | Time from X API fetch to DB insert |
+| **Classification Accuracy** | >85% on 30 test complaints | Manual spot-check vs. BART output |
+| **Location Extraction** | >75% on Indian locality test set | Spot-check 10 extractions with EntityRuler |
+| **Urgency Detection** | >80% on test set | Compare rule output vs. manual label |
+| **Clustering Quality** | Similar complaints grouped | Visual inspection of 3–4 cluster groups |
+| **Summarization Quality** | Clear, actionable, <2 sentences | Read 5 briefs: "Would an officer act on this?" |
+| **End-to-End Latency** | <5 sec from post to dashboard | Time from ingestion to DB write |
 
 ### For Demo Judges:
 
 **They'll care about:**
-1. **Accuracy:** Does it classify correctly? (Spot-check 3 examples)
-2. **Speed:** How fast does it work? (Should be <5 sec)
-3. **Clarity:** Is the output understandable? (Summaries, categories, locations)
-4. **Scalability:** Could this handle 100 posts/day? (Show sample data)
-5. **Real Problem:** Does it actually solve a real pain point? (Yes—manual triage is slow)
+1. **Accuracy:** Correct category + location? (Spot-check 3 examples live)
+2. **Speed:** <5 sec end-to-end
+3. **Prioritization:** Does the ranking make sense?
+4. **Clarity:** Officer briefs readable and actionable?
+5. **Real Problem:** Manual triage is slow — does this solve it?
 
-### Metrics Dashboard:
-Add to dashboard:
+### Metrics Panel (Dashboard):
 ```
-Total Complaints: 47
-├─ By Urgency: High (12), Medium (20), Low (15)
-├─ By Category: Infrastructure (15), Water (10), Health (8), Other (14)
-├─ By Department: PWD (15), Water Works (10), Health Dept (8), Unknown (14)
-└─ Processing Time: Avg 3.2 sec
+Total Clusters: 12      Total Complaints: 47
+├─ By Urgency:    High (5 clusters), Medium (4), Low (3)
+├─ By Category:   Infrastructure (6), Water (3), Health (2), Other (1)
+├─ By Department: PWD (6), Water Works (3), Health Dept (2), Unknown (1)
+└─ Avg Processing Time: 1.8 sec
 ```
 
 ---
@@ -548,108 +560,108 @@ Total Complaints: 47
 ## 11. Stretch Features (If Time Permits)
 
 ### Stretch 1: Department Email Routing
-- Integrate with SMTP to auto-email complaints to department inboxes
-- Email template: `[URGENT] Pothole reported on Main St via #complaints_gov`
+- SMTP auto-email to department inboxes on "Assign" click
+- Template: `[URGENT] Pothole cluster (5 complaints) on MG Road — #complaints_gov`
 - **Time:** +2 hours
 
 ### Stretch 2: Citizen Feedback Loop
-- Add QR code on dashboard → citizens can rate if issue was resolved
-- Feedback stores in DB → improves future classification
+- QR code on dashboard → citizens rate if issue resolved
+- Feedback stored → future prioritization weight
 - **Time:** +3 hours
 
 ### Stretch 3: Multi-Language Support
-- Detect language (langdetect library) → translate to English (Google Translate API)
-- Process in English → return results in original language
-- **Time:** +2 hours (if free API quota available)
+- `langdetect` → Google Translate API → process in English → return in original
+- **Time:** +2 hours
 
 ### Stretch 4: Geospatial Mapping
-- Map all complaints on interactive map (Folium or Mapbox)
-- Cluster by location → "5 pothole complaints on Main Street"
+- Folium/Mapbox: plot all cluster centroids
 - Heatmap by urgency
 - **Time:** +3 hours
 
-### Stretch 5: Model Fine-Tuning
-- Use user corrections from dashboard to retrain classifier
-- Version model → A/B test new vs. old
-- **Time:** +4 hours
+### Stretch 5: Hindi/Regional Complaint Support
+- Extend EntityRuler gazetteer with Hindi transliterations of localities
+- **Time:** +2 hours
 
 ---
 
 ## 12. Risks & Smart Shortcuts
 
 ### Risk 1: X API Rate Limits
-- **Problem:** X API free tier allows 450 requests/15 min; with hashtag search + fetch details, you burn quota fast
-- **Smart Shortcut:** Use cached mock X posts for demo; 1–2 real posts if quota allows
-- **Solution:** Pre-fetch 20 posts before demo starts; run ingestion every 30 min (not 5 min)
+- **Problem:** X API free tier burns quota fast
+- **Smart Shortcut:** Use mock replay for demo; 1–2 real posts if quota allows
+- **Solution:** Pre-fetch 20 posts before demo; use replay mode (one flag in ingestion)
 
-### Risk 2: ML Models Are Slow
-- **Problem:** Transformers (BERT, etc.) take 30+ sec per post on CPU
-- **Smart Shortcut:** Use scikit-learn + spaCy (runs in <1 sec)
-- **Solution:** Pre-compute predictions on mock data; cache results
+### Risk 2: BART is Slow on CPU
+- **Problem:** `bart-large-mnli` can take 3–5 sec per post on CPU
+- **Smart Shortcut:** Pre-compute classifications on all mock data before demo
+- **Solution:** Cache predictions in DB; pipeline runs async in background
 
-### Risk 3: NER Doesn't Extract Informal Locations
-- **Problem:** spaCy finds "Main Street" but not "near the mosque" or "downtown"
-- **Smart Shortcut:** Don't try to perfect this. Accept 70% extraction rate; mark others as "Location unclear"
-- **Solution:** Add fallback regex for street patterns: `\d+ .*?(Street|Road|Avenue)`
+### Risk 3: NER Misses Informal Indian Locations
+- **Problem:** spaCy misses "near the mosque", "Sector 56 chowk"
+- **Smart Shortcut:** EntityRuler gazetteer covers known locals; accept ~70% extraction rate
+- **Solution:** "Location: unclear" shown honestly; manual review flag triggered
 
-### Risk 4: Summarization Takes Too Long
-- **Problem:** Hugging Face transformers summarization: 5–10 sec per post
-- **Smart Shortcut:** Use OpenAI API (super fast, ~0.5 sec) OR use simple extractive summarization (pick first + last sentence)
-- **Solution:** Pre-generate summaries for demo posts the night before
+### Risk 4: Groq API Down / Rate Limited
+- **Problem:** Groq free tier has per-minute limits
+- **Smart Shortcut:** Cache summaries in DB; regenerate only on new clusters
+- **Solution:** Fallback to extractive summary (first + last sentence) if Groq unavailable
 
-### Risk 5: Database Schema Changes Late
-- **Problem:** You realize you need a new field (e.g., "assigned_to_officer") halfway through
-- **Smart Shortcut:** Use SQLite; migrations are instant for small data
-- **Solution:** Plan schema early (Task 1a); leave room for "metadata" JSON column for flexibility
+### Risk 5: Git / Branch Merge Conflicts
+- **Problem:** pipeline/ai-migration-fixes not merged; stash issue on main
+- **Smart Shortcut:** Resolve stash first (see git stash resolution guide); create PR to integration branch
+- **Solution:** Each dev works on named branches; merge sequentially via PRs to avoid conflicts
 
 ### Risk 6: Judges Test Edge Cases
-- **Problem:** Judge posts a complaint in bad grammar or sarcasm; system fails
-- **Smart Shortcut:** Don't promise 100% accuracy. Say "Captures 85%+ of real-world complaints; edge cases flagged for manual review"
-- **Solution:** Add "Confidence Score" field; complaints <0.6 confidence are marked "Manual Review Needed"
+- **Problem:** Sarcastic or unrelated tweet with hashtag
+- **Smart Shortcut:** Show confidence score; anything <0.6 flagged "Manual Review"
+- **Solution:** Don't promise 100% accuracy — "captures 85%+ of real-world complaints"
 
-### Risk 7: Frontend Not Ready When Backend is
-- **Problem:** ML pipeline done but frontend still building (or vice versa)
-- **Smart Shortcut:** Build API-first; swap in real frontend later. Demo with Postman/curl if needed
-- **Solution:** Mock API endpoints in frontend early; switch to real backend when ready
+### Risk 7: Frontend Not Ready
+- **Problem:** ML pipeline done but frontend still building
+- **Smart Shortcut:** Demo with `/api/clusters` JSON directly if needed; frontend is visual polish
+- **Solution:** API-first development; frontend swaps mock → real data with one URL change
 
 ### Smart Shortcut: Deterministic Department Routing
-- **Problem:** Smart routing could be complex (what if complaint mentions multiple departments?)
-- **Smart Shortcut:** Use simple rules:
-  ```python
-  category_to_dept = {
-      "Infrastructure": "Public Works",
-      "Water": "Water Department",
-      "Health": "Health Ministry",
-      ...
-  }
-  ```
-- **Solution:** 90% of complaints map cleanly; don't over-engineer
+```python
+category_to_dept = {
+    "Infrastructure": "Public Works Department",
+    "Water": "Water Works",
+    "Health": "Health Ministry",
+    "Sanitation": "Municipal Corporation",
+    "Safety": "Police / Disaster Management",
+    "Other": "District Collector Office"
+}
+```
 
 ---
 
 ## Build Checklist
 
-- [ ] Backend: FastAPI project + SQLite schema
-- [ ] X API: Fetch posts with #complaints_gov
-- [ ] ML: Train classifier, NER, summarization
-- [ ] Backend: `/api/complaints` + `/api/process` endpoints
-- [ ] Frontend: React dashboard skeleton
-- [ ] Integration: Wire ML to ingestion job
-- [ ] Frontend: Add filters, detail view, real-time updates
-- [ ] Testing: Run end-to-end with 10 test complaints
-- [ ] Polish: Add confidence scores, metrics dashboard
-- [ ] Demo: Prepare 3–4 example X posts, write script
-- [ ] Deployment: Push to Vercel + Railway (if time)
-- [ ] Documentation: README with architecture diagram
+- [x] Dev 2 pipeline code complete (branch: pipeline/ai-migration-fixes)
+- [x] Smoke test: all models load and process correctly
+- [ ] Resolve git stash issue on main branch
+- [ ] Merge pipeline branch → integration branch (PR)
+- [ ] Backend: FastAPI project + SQLite schema (add retweet_count, cluster_id, priority_rank)
+- [ ] X API: Tweepy FilteredStream + mock replay mode
+- [ ] Backend: `/api/complaints`, `/api/process`, `/api/clusters` endpoints
+- [ ] Frontend: Dark-themed dashboard skeleton + cluster card component
+- [ ] Integration: Wire ML pipeline to ingestion job
+- [ ] Frontend: Ranked cluster cards, expand panel, action buttons, filters
+- [ ] Testing: End-to-end with 10–15 test complaints
+- [ ] Polish: Metrics panel, confidence badges, "Manual Review" flag
+- [ ] Demo: Prepare 3–4 example X posts, write script, test mock replay
+- [ ] Deployment: Vercel (frontend) + Railway (backend)
+- [ ] Documentation: README updated ✅
 
 ---
 
 ## Success Criteria
 
-✅ **System works end-to-end:** X post → classification → dashboard display (< 5 sec)
-✅ **ML accuracy:** >80% on category classification
-✅ **Dashboard is usable:** Filters work, detail view shows all metadata
-✅ **Demo is smooth:** Show 3 examples without errors, judges understand the value
-✅ **Code is clean:** Easy to explain, easy for judges to extend
+✅ **System works end-to-end:** X post → pipeline → ranked cluster card in dashboard (<5 sec)
+✅ **ML accuracy:** >80% on category classification (BART zero-shot)
+✅ **Clustering works:** Similar complaints grouped; priority rank visible and logical
+✅ **Dashboard is usable:** Ranked cards, expand panel, officer actions functional
+✅ **Demo is smooth:** 3 examples without errors, judges understand the value
+✅ **Code is clean:** Each module (ingest, classify, NER, cluster, summarise) independently testable
 
 **Good luck! Ship fast, demo fearlessly. 🚀**
