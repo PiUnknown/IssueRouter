@@ -15,6 +15,7 @@ import {
     CheckCircle2,
     Bell,
     Search,
+    Image as ImageIcon,
 } from 'lucide-react'
 import { useIssues } from '../../context/IssueContext'
 import { OFFICERS_BY_DEPT } from '../../data/Officers'
@@ -49,6 +50,28 @@ function TrendIcon({ trend }) {
     if (trend === 'up') return <TrendingUp size={14} className="text-red-500" />
     if (trend === 'down') return <TrendingDown size={14} className="text-green-600" />
     return <Minus size={14} className="text-gray-400" />
+}
+
+function PhotoStrip({ photos }) {
+    if (!photos?.length) return null
+
+    return (
+        <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+                <ImageIcon size={12} className="text-emerald-500" />
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                    Resolved photos
+                </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+                {photos.slice(0, 4).map((photo) => (
+                    <div key={photo.id} className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                        <img src={photo.src} alt={photo.title} className="h-20 w-full object-cover" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
 }
 
 // ── Officer Picker Modal ────────────────────────────────────────────────────
@@ -356,6 +379,10 @@ IssueRouter Civic Triage System`
                                 ))}
                             </div>
                         </div>
+
+                        {cluster.status === 'resolved' && (
+                            <PhotoStrip photos={cluster.resolved_photos} />
+                        )}
 
                         {/* Action buttons */}
                         <div className="grid grid-cols-1 gap-2 pt-1">
