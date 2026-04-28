@@ -24,7 +24,7 @@ def summarise_cluster(
     complaint_count: int
 ) -> str:
     """
-    Calls Groq (Llama 3.1) to generate a one-line officer brief for a cluster.
+    Calls Claude Haiku to generate a one-line officer brief for a cluster.
     Falls back to cache if API fails.
     Only recalculates at thresholds: 10, 50, 100, 250 complaints.
     """
@@ -60,12 +60,12 @@ Sample complaints:
 Output only the brief sentence."""
 
     try:
-        response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+        message = client.messages.create(
+            model="claude-haiku-4-5",
             max_tokens=100,
             messages=[{"role": "user", "content": prompt}]
         )
-        summary = response.choices[0].message.content.strip()
+        summary = message.content[0].text.strip()
 
         # Cache the result
         cache[cache_key] = summary
@@ -74,7 +74,7 @@ Output only the brief sentence."""
         return summary
 
     except Exception as e:
-        print(f"[summariser] Groq API error: {e}. Falling back to cache.")
+        print(f"[summariser] Claude API error: {e}. Falling back to cache.")
 
         # Fallback: return last known summary or generic one
         last = [v for k, v in cache.items() if k.startswith(cluster_id)]
@@ -90,7 +90,7 @@ def generate_recommended_action(
 ) -> str:
     """
     Generates a recommended action string for the officer card.
-    Uses Groq (Llama 3.1) for quality. Falls back to rule-based if API fails.
+    Uses Claude for quality. Falls back to rule-based if API fails.
     """
     FALLBACK_ACTIONS = {
         "Infrastructure": f"Dispatch PWD inspection team to {location}. File urgent repair order.",
@@ -103,15 +103,15 @@ def generate_recommended_action(
     }
 
     try:
-        response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+        message = client.messages.create(
+            model="claude-haiku-4-5",
             max_tokens=60,
             messages=[{
                 "role": "user",
                 "content": f"Write a 1-sentence recommended government action for a {urgency} urgency {category} complaint in {location}. Be specific and actionable. No preamble."
             }]
         )
-        return response.choices[0].message.content.strip()
+        return message.content[0].text.strip()
 
     except Exception:
         return FALLBACK_ACTIONS.get(category, f"Escalate {category} issue in {location} to relevant department immediately.")

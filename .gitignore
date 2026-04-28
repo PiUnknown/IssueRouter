@@ -43,3 +43,7 @@ next.user-config.*
 
 # Local env variants
 .env*.local
+
+#__pycache__
+__pycache__/
+*.pyc
