@@ -4,7 +4,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 _model = None
-SIMILARITY_THRESHOLD = 0.82  # tune this if clusters are too big or too small
+SIMILARITY_THRESHOLD = 0.70  # tune this if clusters are too big or too small
 
 def load_clusterer():
     global _model

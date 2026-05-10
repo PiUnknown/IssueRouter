@@ -1,0 +1,506 @@
+[
+    {
+        "id": "1001",
+        "username": "vasant_kunj_resident",
+        "text": "Gas leak smell near Vasant Kunj Block C! Very dangerous, nobody responding to emergency calls. Please urgent action #complaints_gov",
+        "likes": 203,
+        "retweets": 147,
+        "created_at": "2024-01-15T09:00:00Z"
+    },
+    {
+        "id": "1002",
+        "username": "delhi_safety_alert",
+        "text": "Strong gas leak smell in Vasant Kunj residential area Block C D. Residents evacuating. This is an emergency! #complaints_gov",
+        "likes": 189,
+        "retweets": 203,
+        "created_at": "2024-01-15T09:15:00Z"
+    },
+    {
+        "id": "1003",
+        "username": "vk_colony_news",
+        "text": "Gas pipeline leaking in Vasant Kunj Block C since last night. Children and elderly at risk. Jal Board not picking up calls #complaints_gov",
+        "likes": 156,
+        "retweets": 178,
+        "created_at": "2024-01-15T09:30:00Z"
+    },
+    {
+        "id": "1004",
+        "username": "emergency_delhi",
+        "text": "Vasant Kunj gas leak still not fixed after 6 hours. This is a serious emergency. Someone could get hurt. #complaints_gov",
+        "likes": 134,
+        "retweets": 167,
+        "created_at": "2024-01-15T09:45:00Z"
+    },
+    {
+        "id": "1005",
+        "username": "south_delhi_news",
+        "text": "Massive gas leak reported in Vasant Kunj Block C. Residents in panic. No response from authorities yet. Explosion risk #complaints_gov",
+        "likes": 178,
+        "retweets": 212,
+        "created_at": "2024-01-15T10:00:00Z"
+    },
+    {
+        "id": "1006",
+        "username": "uttam_resident_1",
+        "text": "Water from tap is literally brown and smells like sewage in Uttam Nagar. Kids got sick. This is criminal #complaints_gov",
+        "likes": 89,
+        "retweets": 134,
+        "created_at": "2024-01-15T08:00:00Z"
+    },
+    {
+        "id": "1007",
+        "username": "uttam_nagar_voices",
+        "text": "Contaminated water supply in Uttam Nagar Block A B C D. Entire colony affected. Gastroenteritis cases rising #complaints_gov",
+        "likes": 112,
+        "retweets": 156,
+        "created_at": "2024-01-15T08:20:00Z"
+    },
+    {
+        "id": "1008",
+        "username": "west_delhi_watch",
+        "text": "Uttam Nagar water contamination has been going on for 3 days now. Brown foul smelling water from taps. Jal Board do something #complaints_gov",
+        "likes": 98,
+        "retweets": 143,
+        "created_at": "2024-01-15T08:40:00Z"
+    },
+    {
+        "id": "1009",
+        "username": "priya_wahi",
+        "text": "Entire colony in Uttam Nagar has same contaminated water problem. Children falling ill. Been 3 days with no response #complaints_gov",
+        "likes": 78,
+        "retweets": 121,
+        "created_at": "2024-01-15T09:00:00Z"
+    },
+    {
+        "id": "1010",
+        "username": "delhi_water_crisis",
+        "text": "Water supply in Uttam Nagar is contaminated and making people sick. Lab testing needed immediately. Jal Board wake up #complaints_gov",
+        "likes": 134,
+        "retweets": 189,
+        "created_at": "2024-01-15T09:20:00Z"
+    },
+    {
+        "id": "1011",
+        "username": "uttam_nagar_moms",
+        "text": "My child is hospitalised because of contaminated water in Uttam Nagar. How is this acceptable in 2024 #complaints_gov",
+        "likes": 203,
+        "retweets": 267,
+        "created_at": "2024-01-15T09:40:00Z"
+    },
+    {
+        "id": "1012",
+        "username": "sewage_alert_dharavi",
+        "text": "Sewage overflow on main road in Dharavi near the market. Flooding the streets. Health hazard for thousands of residents #complaints_gov",
+        "likes": 145,
+        "retweets": 189,
+        "created_at": "2024-01-15T07:30:00Z"
+    },
+    {
+        "id": "1013",
+        "username": "dharavi_community",
+        "text": "Sewage water flooding Dharavi main road for 2 days. MCGM not responding. Disease outbreak risk is real #complaints_gov",
+        "likes": 167,
+        "retweets": 201,
+        "created_at": "2024-01-15T07:45:00Z"
+    },
+    {
+        "id": "1014",
+        "username": "mumbai_civic_watch",
+        "text": "Massive sewage overflow in Dharavi blocking roads and flooding homes. This is a public health emergency #complaints_gov",
+        "likes": 189,
+        "retweets": 234,
+        "created_at": "2024-01-15T08:00:00Z"
+    },
+    {
+        "id": "1015",
+        "username": "dharavi_residents",
+        "text": "Sewage overflow in Dharavi has not been fixed for 48 hours. Children walking through sewage water to reach school #complaints_gov",
+        "likes": 212,
+        "retweets": 278,
+        "created_at": "2024-01-15T08:15:00Z"
+    },
+    {
+        "id": "1016",
+        "username": "mayurvihar_news",
+        "text": "Massive pothole on Mayur Vihar Phase 1 main road causing vehicle damage and accidents. Been unfixed for 2 months #complaints_gov",
+        "likes": 67,
+        "retweets": 89,
+        "created_at": "2024-01-15T07:00:00Z"
+    },
+    {
+        "id": "1017",
+        "username": "rajesh_mv",
+        "text": "Mayur Vihar main road is absolutely destroyed with potholes. My tyre burst today. Someone will die here soon #complaints_gov",
+        "likes": 45,
+        "retweets": 67,
+        "created_at": "2024-01-15T07:20:00Z"
+    },
+    {
+        "id": "1018",
+        "username": "delhi_commuter_mv",
+        "text": "Same massive potholes on Mayur Vihar Phase 1 road unfixed for months. 3 accidents this week alone. PWD wake up #complaints_gov",
+        "likes": 78,
+        "retweets": 102,
+        "created_at": "2024-01-15T07:40:00Z"
+    },
+    {
+        "id": "1019",
+        "username": "mv_residents_rwa",
+        "text": "Pothole damage on Mayur Vihar arterial road is severe. Vehicles damaged daily. Emergency patching needed immediately #complaints_gov",
+        "likes": 56,
+        "retweets": 78,
+        "created_at": "2024-01-15T08:00:00Z"
+    },
+    {
+        "id": "1020",
+        "username": "east_delhi_voices",
+        "text": "Mayur Vihar Phase 1 to Phase 3 road full of dangerous potholes. Two wheelers most at risk. When will PWD fix this #complaints_gov",
+        "likes": 89,
+        "retweets": 112,
+        "created_at": "2024-01-15T08:20:00Z"
+    },
+    {
+        "id": "1021",
+        "username": "mv_daily_commuter",
+        "text": "Road condition in Mayur Vihar is the worst I have seen in years. Potholes everywhere causing damage and injuries #complaints_gov",
+        "likes": 34,
+        "retweets": 45,
+        "created_at": "2024-01-15T08:40:00Z"
+    },
+    {
+        "id": "1022",
+        "username": "mv_biker_community",
+        "text": "Biker fell and got injured due to pothole on Mayur Vihar main road today. This is negligence by PWD department #complaints_gov",
+        "likes": 112,
+        "retweets": 145,
+        "created_at": "2024-01-15T09:00:00Z"
+    },
+    {
+        "id": "1023",
+        "username": "rohini_sec7_resident",
+        "text": "No electricity in Rohini Sector 7 for 10 hours straight. This is the 4th power cut this week. BSES fix the transformer #complaints_gov",
+        "likes": 67,
+        "retweets": 89,
+        "created_at": "2024-01-15T06:30:00Z"
+    },
+    {
+        "id": "1024",
+        "username": "nitesh_kumar_rohini",
+        "text": "Hospital in Rohini Sector 7 running on backup generator because BSES has not fixed the substation fault. Emergency situation #complaints_gov",
+        "likes": 145,
+        "retweets": 189,
+        "created_at": "2024-01-15T06:45:00Z"
+    },
+    {
+        "id": "1025",
+        "username": "rohini_voices",
+        "text": "Power cuts in Rohini Sector 7 are daily now. 8 to 12 hours without electricity. Food spoiling. BSES give us answers #complaints_gov",
+        "likes": 78,
+        "retweets": 101,
+        "created_at": "2024-01-15T07:00:00Z"
+    },
+    {
+        "id": "1026",
+        "username": "north_delhi_watch",
+        "text": "Rohini Sector 7 substation transformer has been faulty for a week. BSES knows but hasnt fixed it. Residents suffering #complaints_gov",
+        "likes": 56,
+        "retweets": 78,
+        "created_at": "2024-01-15T07:15:00Z"
+    },
+    {
+        "id": "1027",
+        "username": "rohini_rwa_official",
+        "text": "Formal complaint about 12 hour daily power outages in Rohini Sector 7. Senior citizens and patients at serious risk #complaints_gov",
+        "likes": 89,
+        "retweets": 112,
+        "created_at": "2024-01-15T07:30:00Z"
+    },
+    {
+        "id": "1028",
+        "username": "rohini_sec7_angry",
+        "text": "BSES Rohini Sector 7 transformer fault still unresolved after 6 days. We pay our bills. Give us electricity #complaints_gov",
+        "likes": 45,
+        "retweets": 67,
+        "created_at": "2024-01-15T07:45:00Z"
+    },
+    {
+        "id": "1029",
+        "username": "lajpat_colony_watch",
+        "text": "3rd dog bite case in Lajpat Nagar colony this week. A 7 year old was attacked this morning near the park. Emergency action needed #complaints_gov",
+        "likes": 134,
+        "retweets": 178,
+        "created_at": "2024-01-15T06:00:00Z"
+    },
+    {
+        "id": "1030",
+        "username": "safe_streets_delhi",
+        "text": "Aggressive stray dog pack in Lajpat Nagar park area has bitten 4 people in 72 hours. Animal control team not deployed yet #complaints_gov",
+        "likes": 156,
+        "retweets": 201,
+        "created_at": "2024-01-15T06:20:00Z"
+    },
+    {
+        "id": "1031",
+        "username": "priyanka_ln_resident",
+        "text": "Stray dog menace in Lajpat Nagar is out of control. Nobody is safe walking near the colony park after dark #complaints_gov",
+        "likes": 89,
+        "retweets": 112,
+        "created_at": "2024-01-15T06:40:00Z"
+    },
+    {
+        "id": "1032",
+        "username": "lajpat_nagar_parents",
+        "text": "Children cannot play in Lajpat Nagar park because of aggressive stray dogs. 4 bite incidents reported. ABC team needed urgently #complaints_gov",
+        "likes": 112,
+        "retweets": 145,
+        "created_at": "2024-01-15T07:00:00Z"
+    },
+    {
+        "id": "1033",
+        "username": "dwarka_matters",
+        "text": "Garbage bins near Sector 10 Dwarka market overflowing for 6 days. Rats visible. Stench unbearable. MCD sleeping #complaints_gov",
+        "likes": 45,
+        "retweets": 56,
+        "created_at": "2024-01-15T05:30:00Z"
+    },
+    {
+        "id": "1034",
+        "username": "sunita_dwarka",
+        "text": "Cannot walk on Dwarka Sector 10 footpath. Garbage piled up to 4 feet. Collection missed twice this week by MCD #complaints_gov",
+        "likes": 34,
+        "retweets": 45,
+        "created_at": "2024-01-15T05:45:00Z"
+    },
+    {
+        "id": "1035",
+        "username": "dwarka_market_trader",
+        "text": "Business down 30 percent because customers avoid Dwarka Sector 10 market due to garbage smell. MCD please act now #complaints_gov",
+        "likes": 56,
+        "retweets": 67,
+        "created_at": "2024-01-15T06:00:00Z"
+    },
+    {
+        "id": "1036",
+        "username": "dwarka_rwa",
+        "text": "Garbage accumulation near Dwarka Sector 10 market is a health hazard. Rodents spotted. Immediate MCD intervention needed #complaints_gov",
+        "likes": 67,
+        "retweets": 78,
+        "created_at": "2024-01-15T06:15:00Z"
+    },
+    {
+        "id": "1037",
+        "username": "dwarka_hygiene_watch",
+        "text": "5 days of uncollected garbage in Dwarka Sector 10. This is creating a disease breeding ground. MCD where are you #complaints_gov",
+        "likes": 78,
+        "retweets": 89,
+        "created_at": "2024-01-15T06:30:00Z"
+    },
+    {
+        "id": "1038",
+        "username": "akbar_road_watch",
+        "text": "14 of 22 streetlights broken on Akbar Road between Janpath and Raisina Road. Total darkness after 9pm. Safety concern #complaints_gov",
+        "likes": 34,
+        "retweets": 45,
+        "created_at": "2024-01-15T05:00:00Z"
+    },
+    {
+        "id": "1039",
+        "username": "central_delhi_news",
+        "text": "Akbar Road completely dark after 9pm. Robbery reported near Janpath last night. Still 14 street poles not working #complaints_gov",
+        "likes": 56,
+        "retweets": 67,
+        "created_at": "2024-01-15T05:15:00Z"
+    },
+    {
+        "id": "1040",
+        "username": "safe_walk_delhi",
+        "text": "Women feel extremely unsafe on Akbar Road stretch at night due to broken streetlights. Complained 11 days ago. No action #complaints_gov",
+        "likes": 78,
+        "retweets": 89,
+        "created_at": "2024-01-15T05:30:00Z"
+    },
+    {
+        "id": "1041",
+        "username": "noida_sec14_resident",
+        "text": "No water supply in Sector 14 Noida for 3 days. Families suffering in the heat. Noida Authority not responding to calls #complaints_gov",
+        "likes": 89,
+        "retweets": 112,
+        "created_at": "2024-01-15T04:30:00Z"
+    },
+    {
+        "id": "1042",
+        "username": "noida_water_crisis",
+        "text": "Water supply cut in Noida Sector 14 for 72 hours. Buying water from tankers at high cost. Authorities not helping #complaints_gov",
+        "likes": 67,
+        "retweets": 89,
+        "created_at": "2024-01-15T04:45:00Z"
+    },
+    {
+        "id": "1043",
+        "username": "sec14_noida_rwa",
+        "text": "Noida Sector 14 water supply has been disrupted for 3 days. Entire colony suffering. Pipeline burst not repaired yet #complaints_gov",
+        "likes": 78,
+        "retweets": 101,
+        "created_at": "2024-01-15T05:00:00Z"
+    },
+    {
+        "id": "1044",
+        "username": "noida_civic_news",
+        "text": "Water pipeline burst in Noida Sector 14 left entire area without water for 3 days. Noida Authority response is shameful #complaints_gov",
+        "likes": 112,
+        "retweets": 134,
+        "created_at": "2024-01-15T05:15:00Z"
+    },
+    {
+        "id": "1045",
+        "username": "bandra_water_woes",
+        "text": "No water supply in Bandra West for 2 days. MCGM helpline just keeps ringing. Residents forced to buy expensive water tankers #complaints_gov",
+        "likes": 89,
+        "retweets": 112,
+        "created_at": "2024-01-15T04:00:00Z"
+    },
+    {
+        "id": "1046",
+        "username": "bandra_residents_forum",
+        "text": "Water cut in Bandra West continues for second day. No communication from MCGM about when supply will be restored #complaints_gov",
+        "likes": 67,
+        "retweets": 89,
+        "created_at": "2024-01-15T04:15:00Z"
+    },
+    {
+        "id": "1047",
+        "username": "west_mumbai_watch",
+        "text": "Bandra West water supply disruption entering 48 hours. Elderly and sick residents struggling. MCGM must act immediately #complaints_gov",
+        "likes": 101,
+        "retweets": 134,
+        "created_at": "2024-01-15T04:30:00Z"
+    },
+    {
+        "id": "1048",
+        "username": "koramangala_civic",
+        "text": "Garbage pile up in Koramangala near Signal junction. BBMP collection missed for 5 days. Stench and rodent problem worsening #complaints_gov",
+        "likes": 45,
+        "retweets": 56,
+        "created_at": "2024-01-15T03:30:00Z"
+    },
+    {
+        "id": "1049",
+        "username": "bangalore_civic_watch",
+        "text": "Koramangala garbage overflow near park is getting worse daily. BBMP needs to clear this urgently before disease spreads #complaints_gov",
+        "likes": 56,
+        "retweets": 67,
+        "created_at": "2024-01-15T03:45:00Z"
+    },
+    {
+        "id": "1050",
+        "username": "koramangala_rwa",
+        "text": "Waste accumulation at Koramangala junction is massive. 5 days of uncollected garbage creating public health hazard #complaints_gov",
+        "likes": 67,
+        "retweets": 78,
+        "created_at": "2024-01-15T04:00:00Z"
+    },
+    {
+        "id": "1051",
+        "username": "andheri_bridge_alert",
+        "text": "Bridge near Andheri station showing cracks and structural damage. Thousands cross daily. Inspection needed urgently before collapse #complaints_gov",
+        "likes": 189,
+        "retweets": 234,
+        "created_at": "2024-01-15T03:00:00Z"
+    },
+    {
+        "id": "1052",
+        "username": "mumbai_infra_watch",
+        "text": "Andheri bridge has visible structural damage and cracks. Municipal engineers must inspect immediately. Risk of collapse #complaints_gov",
+        "likes": 167,
+        "retweets": 212,
+        "created_at": "2024-01-15T03:15:00Z"
+    },
+    {
+        "id": "1053",
+        "username": "andheri_residents",
+        "text": "Dangerous cracks visible on Andheri bridge used by thousands daily. This is an accident waiting to happen. Act now MCGM #complaints_gov",
+        "likes": 201,
+        "retweets": 256,
+        "created_at": "2024-01-15T03:30:00Z"
+    },
+    {
+        "id": "1054",
+        "username": "gurgaon_flooding",
+        "text": "Flooding on Golf Course Road Gurgaon after heavy rain. Cars submerged. Drainage system completely collapsed again #complaints_gov",
+        "likes": 112,
+        "retweets": 145,
+        "created_at": "2024-01-15T02:30:00Z"
+    },
+    {
+        "id": "1055",
+        "username": "gurugram_civic_alert",
+        "text": "Golf Course Road Gurgaon completely flooded. Traffic standstill. Drainage failure every monsoon but never fixed permanently #complaints_gov",
+        "likes": 134,
+        "retweets": 167,
+        "created_at": "2024-01-15T02:45:00Z"
+    },
+    {
+        "id": "1056",
+        "username": "gurgaon_commuters",
+        "text": "Flooding on Golf Course Road Gurgaon making it impassable. Vehicles damaged. MCG drainage infrastructure is a joke #complaints_gov",
+        "likes": 156,
+        "retweets": 189,
+        "created_at": "2024-01-15T03:00:00Z"
+    },
+    {
+        "id": "1057",
+        "username": "faridabad_road_alert",
+        "text": "Road collapse on NH48 near Faridabad due to heavy rain. Multiple vehicles damaged. Accident risk is very high #complaints_gov",
+        "likes": 89,
+        "retweets": 112,
+        "created_at": "2024-01-15T02:00:00Z"
+    },
+    {
+        "id": "1058",
+        "username": "faridabad_commuters",
+        "text": "NH48 Faridabad stretch has a massive road collapse. Huge crater in middle of highway. Immediate barricading needed #complaints_gov",
+        "likes": 101,
+        "retweets": 134,
+        "created_at": "2024-01-15T02:15:00Z"
+    },
+    {
+        "id": "1059",
+        "username": "faridabad_live",
+        "text": "Road cave in on NH48 near Faridabad creating dangerous driving conditions. No warning signs put up yet by authorities #complaints_gov",
+        "likes": 78,
+        "retweets": 101,
+        "created_at": "2024-01-15T02:30:00Z"
+    },
+    {
+        "id": "1060",
+        "username": "rohini_park_suggestion",
+        "text": "Rohini Sector 7 park benches need painting and repair. Also the walking track has cracks. Minor maintenance request #complaints_gov",
+        "likes": 12,
+        "retweets": 5,
+        "created_at": "2024-01-15T01:30:00Z"
+    },
+    {
+        "id": "1061",
+        "username": "dwarka_garden_feedback",
+        "text": "Dwarka Sector 10 community garden needs trimming and general upkeep. Suggestion for improvement to MCD team #complaints_gov",
+        "likes": 8,
+        "retweets": 3,
+        "created_at": "2024-01-15T01:45:00Z"
+    },
+    {
+        "id": "1062",
+        "username": "saket_noise_complaint",
+        "text": "Loud construction noise in Saket late at night violating noise pollution norms. Residents unable to sleep. Needs action #complaints_gov",
+        "likes": 34,
+        "retweets": 45,
+        "created_at": "2024-01-15T01:00:00Z"
+    },
+    {
+        "id": "1063",
+        "username": "saket_residents",
+        "text": "Construction site in Saket operating past 10pm creating unbearable noise. This violates Delhi noise pollution rules #complaints_gov",
+        "likes": 45,
+        "retweets": 56,
+        "created_at": "2024-01-15T01:15:00Z"
+    }
+]
