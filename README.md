@@ -31,7 +31,7 @@ A three-layer system:
 - **Named Entity Recognition** → extracts location, landmarks, and departments using spaCy `en_core_web_sm` + a custom EntityRuler gazetteer tuned for Indian localities
 - **Urgency scoring** → hybrid approach: keyword rules for speed, retweet-count social signal boost for amplification (high retweet count raises priority rank)
 - **Semantic clustering** → groups similar complaints into one issue cluster using `sentence-transformers/all-MiniLM-L6-v2`
-- **LLM summarisation** → generates a clean one-line officer brief via **Groq API** (free tier, `llama3-8b-8192`)
+- **LLM summarisation** → generates a clean one-line officer brief via **Groq API** (free tier, `llama3-instant-8b`)
 
 **3. Officer Dashboard** — Government officers see ranked cluster cards, not individual tweets. Each card shows:
 - Priority rank (#1, #2, #3…) computed from complaint volume × social reach

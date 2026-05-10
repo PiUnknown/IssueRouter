@@ -1,142 +1,180 @@
-"""
-main.py — IssueRouter FastAPI application
-Loads tweets.json → processes through NLP pipeline → outputs results
-No database dependency. Pure pipeline processing.
-"""
 from dotenv import load_dotenv
 load_dotenv()
 
 import json
-import sys
-from pathlib import Path
+import uuid
+import threading
+from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-
-sys.path.insert(0, str(Path(__file__).parent))
 
 from pipeline.main import load_all_models, process_post
-from ingestion.mock_feed import load_tweets
+from ingestion.db_feed import stream_from_db
+from db.database import engine, Base, SessionLocal
+from db.models import Complaint, Cluster, Action
 
-# ── FastAPI App ────────────────────────────────────────────────────
-app = FastAPI(
-    title="IssueRouter API",
-    description="Civic complaint routing — NLP Pipeline (No DB)",
-    version="1.0.0-dev",
-)
+app = FastAPI()
 
-# ── CORS Setup ────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ── In-memory storage for processed tweets ────────────────────────
-processed_results = []
+def process_and_save(raw_tweet: dict):
+    from pipeline.clusterer import find_matching_cluster, update_centroid
+    from pipeline.summariser import summarise_cluster, generate_recommended_action
 
-# ── Request/Response Models ────────────────────────────────────────
-class ComplaintRequest(BaseModel):
-    text: str
+    db = SessionLocal()
 
-# ── Routes ────────────────────────────────────────────────────────
-
-@app.get("/", tags=["health"])
-def home():
-    """Health check endpoint."""
-    return {
-        "message": "IssueRouter pipeline is running",
-        "status": "ok",
-        "tweets_processed": len(processed_results)
-    }
-
-@app.post("/api/process", tags=["pipeline"])
-def process_complaint(req: ComplaintRequest):
-    """Process a single complaint text through the NLP pipeline."""
-    raw_tweet = {
-        "id": "demo_001",
-        "username": "demo_user",
-        "text": req.text,
-        "likes": 0,
-        "retweets": 0,
-        "created_at": "now",
-    }
-    return process_post(raw_tweet)
-
-@app.get("/api/results", tags=["results"])
-def get_results(limit: int = 10):
-    """Get last N processed tweets."""
-    return {
-        "total_processed": len(processed_results),
-        "last": processed_results[-limit:] if processed_results else []
-    }
-
-@app.get("/api/results/export", tags=["results"])
-def export_all_results():
-    """Export all processed results."""
-    return {
-        "total": len(processed_results),
-        "results": processed_results
-    }
-
-@app.get("/api/process-batch", tags=["batch"])
-def process_batch():
-    """Process all tweets from tweets.json."""
-    global processed_results
-    
     try:
-        print("\n[API] Loading tweets...")
-        tweets = load_tweets()
-        print(f"[API] Loaded {len(tweets)} tweets")
-        
-        print("[API] Processing through pipeline...")
-        processed_results = []
-        
-        for tweet in tweets:
-            try:
-                result = process_post(tweet)
-                processed_results.append(result)
-            except Exception as e:
-                print(f"[API] Error processing tweet: {e}")
-                continue
-        
-        print(f"[API] ✓ Processed {len(processed_results)} tweets")
-        
-        # Save to cache
-        cache_path = Path(__file__).parent / "cache" / "summaries.json"
-        cache_path.parent.mkdir(exist_ok=True)
-        cache_path.write_text(json.dumps({
-            "timestamp": "now",
-            "total": len(processed_results),
-            "results": processed_results
-        }, indent=2))
-        
-        return {
-            "status": "success",
-            "total_processed": len(processed_results),
-            "cache_path": str(cache_path)
-        }
-    
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e)
-        }
+        # Step 1 — Run through pipeline
+        result = process_post(raw_tweet)
 
-# ── Startup Event ────────────────────────────────────────────────
+        # Step 2 — Dedup check
+        existing = db.query(Complaint).filter(
+            Complaint.tweet_id == result["tweet_id"]
+        ).first()
+        if existing:
+            print(f"[main] Duplicate skipped: {result['tweet_id']}")
+            return
+
+        # Step 3 — Find or create cluster
+        all_clusters = db.query(Cluster).all()
+        clusters_for_matcher = [
+            {
+                "id":                 c.id,
+                "category":           c.category,
+                "centroid_embedding": json.loads(c.centroid_embedding)
+            }
+            for c in all_clusters
+        ]
+
+        matched_cluster_id = find_matching_cluster(
+            result["clean_text"],
+            result["category"],
+            clusters_for_matcher
+        )
+
+        if matched_cluster_id:
+            cluster = db.query(Cluster).filter(
+                Cluster.id == matched_cluster_id
+            ).first()
+
+            cluster.complaint_count += 1
+            cluster.rt_reach        += result["retweets"]
+
+            old_centroid = json.loads(cluster.centroid_embedding)
+            new_centroid = update_centroid(
+                old_centroid,
+                result["clean_text"],
+                cluster.complaint_count
+            )
+            cluster.centroid_embedding = json.dumps(new_centroid)
+            cluster.priority_score = (
+                cluster.complaint_count * 1.0 +
+                cluster.rt_reach * 0.3 +
+                result["urgency_weight"]
+            )
+            cluster.last_updated = datetime.utcnow()
+
+            if cluster.complaint_count in [10, 50, 100, 250]:
+                sample_texts = [
+                    c.clean_text for c in
+                    db.query(Complaint).filter(
+                        Complaint.cluster_id == matched_cluster_id
+                    ).limit(5).all()
+                ]
+                cluster.summary = summarise_cluster(
+                    matched_cluster_id,
+                    sample_texts,
+                    cluster.location or "",
+                    cluster.category,
+                    cluster.complaint_count
+                )
+
+            complaint_cluster_id = matched_cluster_id
+
+        else:
+            new_cluster_id = f"CLU-{uuid.uuid4().hex[:6].upper()}"
+
+            summary = summarise_cluster(
+                new_cluster_id,
+                [result["clean_text"]],
+                result["location"] or "Unknown",
+                result["category"],
+                1
+            )
+
+            recommended_action = generate_recommended_action(
+                result["category"],
+                result["location"] or "Unknown",
+                result["urgency"]
+            )
+
+            new_cluster = Cluster(
+                id                 = new_cluster_id,
+                problem            = f"{result['category']} issue — {result['location'] or 'Unknown'}",
+                summary            = summary,
+                location           = result["location"] or "Unknown",
+                category           = result["category"],
+                department         = result["department"],
+                complaint_count    = 1,
+                rt_reach           = result["retweets"],
+                urgency            = result["urgency"],
+                priority_score     = 1.0 + result["retweets"] * 0.3 + result["urgency_weight"],
+                recommended_action = recommended_action,
+                status             = "pending",
+                centroid_embedding = json.dumps(result["embedding"]),
+                last_updated       = datetime.utcnow()
+            )
+            db.add(new_cluster)
+            complaint_cluster_id = new_cluster_id
+
+        # Step 4 — Save complaint
+        complaint = Complaint(
+            tweet_id   = result["tweet_id"],
+            username   = result["username"],
+            raw_text   = result["raw_text"],
+            clean_text = result["clean_text"],
+            cluster_id = complaint_cluster_id,
+            category   = result["category"],
+            urgency    = result["urgency"],
+            location   = result["location"],
+            retweets   = result["retweets"],
+            likes      = result["likes"],
+        )
+        db.add(complaint)
+        db.commit()
+        print(f"[main] ✓ Saved: @{result['username']} → {complaint_cluster_id}")
+
+    except Exception as e:
+        print(f"[main] Error: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+
 @app.on_event("startup")
-def startup_event():
-    """Load models on startup."""
-    print("\n[IssueRouter] Starting up...")
-    print("[IssueRouter] Loading ML models...")
-    try:
-        load_all_models()
-        print("[IssueRouter] ✓ Models loaded successfully.\n")
-    except Exception as e:
-        print(f"[IssueRouter] ✗ Error loading models: {e}\n")
+async def startup():
+    Base.metadata.create_all(bind=engine)
+    load_all_models()
+
+    thread = threading.Thread(
+        target=stream_from_db,
+        args=(process_and_save,),
+        kwargs={"interval_seconds": 8},
+        daemon=True
+    )
+    thread.start()
+    print("[main] DB feed started.")
+
+
+from api.clusters import router as clusters_router
+from api.actions  import router as actions_router
+from api.stats    import router as stats_router
+
+app.include_router(clusters_router)
+app.include_router(actions_router)
+app.include_router(stats_router)

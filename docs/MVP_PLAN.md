@@ -288,7 +288,7 @@ At end of day: "Export Brief" generates a one-page summary PDF for the DM's revi
       |── Classifier     (BART zero-shot)
       |── NER            (spaCy en_core_web_sm + EntityRuler)
       |── Urgency Scorer (rules + RT boost)
-      |── Summariser     (Claude Haiku API)
+      |── Summariser     (Llama 3 Instant 8B via Groq API)
       |── Cluster Matcher (sentence-transformers cosine similarity)
       |
       | structured ClusterUpdate object
