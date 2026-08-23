@@ -104,12 +104,16 @@ issuerouter/
 
 ## 2. TEAM ROLE ASSIGNMENT
 
-| Member | GitHub Handle | Owns | Branch Prefix |
-|--------|--------------|------|---------------|
-| Dev 1  | @dev1 | FastAPI, DB models, API endpoints | `backend/` |
-| Dev 2  | @dev2 | NLP pipeline, ingestion service | `pipeline/` |
-| Dev 3  | @dev3 | Dashboard UI, ClusterCard, Sidebar | `frontend/` |
-| Dev 4  | @dev4 | Seed data, tests, DemoTrigger, integration | `infra/` |
+There are six developers working on five dedicated branches:
+
+| Member | Focus | Owns | Target Branch |
+|--------|-------|------|---------------|
+| Dev 1  | Backend Core & Server | FastAPI server, startup scripts | `backend` |
+| Dev 2  | NLP pipeline | BART classification, spaCy NER, routing rules | `nlp-pipeline` |
+| Dev 3  | Frontend | Dashboard, pages, layouts, Axios client | `frontend` |
+| Dev 4  | Database & Seeding | SQLite database models, schemas, seed script | `database` |
+| Dev 5  | Testing & Integration | Integration scripts, dashboard components testing | `backend` / `frontend` |
+| Dev 6  | Docs & Release | README, team guide, documentation | `document-update` |
 
 ---
 
@@ -146,56 +150,54 @@ git push origin main
 ```
 
 ### 3.4 Branch protection (repo owner does this)
-Go to **Settings → Branches → Add rule**:
-- Branch name pattern: `main`
-- ✅ Require pull request before merging
-- ✅ Require at least 1 approval
-- ✅ Do not allow bypassing the above settings
+Since all changes are to be done in five persistent branches (`frontend`, `backend`, `database`, `nlp-pipeline`, and `document-update`), the `main` branch functions as the single source of truth combining the whole project.
 
-This means **nobody pushes to main directly**. All work goes through PRs.
+**Rule:** Nobody commits directly to `main`. Every developer pushes to their respective persistent work branch. Merging into `main` only occurs after the changes are verified to be bug-free and working as expected.
 
 ---
 
 ## 4. BRANCHING STRATEGY
 
-### Branch naming convention
-```
-{prefix}/{short-description}
+Instead of creating multiple temporary feature branches, the team works out of **five persistent development branches**:
 
-Examples:
-backend/db-models
-backend/fastapi-endpoints
-pipeline/classifier
-pipeline/ner-spacy
-pipeline/urgency-scorer
-pipeline/clusterer
-pipeline/summariser
-frontend/cluster-card
-frontend/sidebar-filters
-frontend/stats-bar
-infra/seed-data
-infra/demo-trigger-button
-infra/integration-tests
-```
+1. **`frontend`** — For all dashboard React components, UI edits, pages, assets, and api/hooks client-side updates.
+2. **`backend`** — For FastAPI server, startup rules, routing endpoints, output caching, and app configurations.
+3. **`database`** — For SQLAlchemy tables, database engines, schemas, and seeding scripts.
+4. **`nlp-pipeline`** — For classifiers, clusterers, spaCy models, and Groq summarization services.
+5. **`document-update`** — For `README.md`, `Issuerouter_team_guide.md`, and any text/diagram document updates.
 
-### Daily workflow — every team member follows this
+### Daily Workflow
+
+Every team member follows these steps:
+
+#### Step 1: Sync Your Local Work Branch
+Switch to your respective branch and pull the latest changes:
 ```bash
-# 1. Always start from an updated main
+# Example for a frontend developer:
+git checkout frontend
+git pull origin frontend
+```
+
+#### Step 2: Make Changes and Test Locally
+Write your code, make sure it runs correctly, and run tests.
+
+#### Step 3: Commit and Push to Your Respective Branch
+```bash
+git add frontend/src/components/ui/ClusterCard.jsx
+git commit -m "feat(frontend): update card styling and layout"
+git push origin frontend
+```
+
+#### Step 4: Merging into the Main Branch (Default)
+When a branch has verified, working changes that need to be unified:
+1. Ensure the code has been successfully reviewed.
+2. Sync `main` locally, merge the work branch into it, and push to remote `main`:
+```bash
 git checkout main
 git pull origin main
-
-# 2. Create your feature branch
-git checkout -b pipeline/classifier
-
-# 3. Work. Commit small and often.
-git add backend/pipeline/classifier.py
-git commit -m "feat(pipeline): add BART zero-shot classifier with fallback"
-
-# 4. Push your branch
-git push origin pipeline/classifier
-
-# 5. Open a PR on GitHub when the feature is ready to review
-# → base: main  ←  compare: pipeline/classifier
+git merge frontend
+git push origin main
+```
 ```
 
 ---
@@ -421,23 +423,23 @@ Hour 5–6  → tests/test_pipeline.py
 
 ## 11. CONFLICT PREVENTION RULES
 
-These 6 rules prevent 90% of merge conflicts in a hackathon:
+These 6 rules prevent 90% of merge conflicts when working with persistent branches:
 
-**Rule 1:** Dev 1 and Dev 2 never touch `frontend/`. Dev 3 and Dev 4 never touch `backend/pipeline/`.
+**Rule 1:** Push changes only to the branch corresponding to your work (e.g. backend files to the `backend` branch, database files to the `database` branch, docs to `document-update`).
 
-**Rule 2:** Only Dev 1 modifies `db/models.py`. If anyone else needs a schema change, they ask Dev 1 to do it.
+**Rule 2:** Only Dev 4 modifies database files (`backend/db/`). Other developers request Dev 4 to make database schema edits.
 
-**Rule 3:** `tweets.json` is owned by Dev 4. Nobody else edits it.
-
-**Rule 4:** Never `git push origin main` directly. Always PR.
-
-**Rule 5:** Pull from main every 2 hours minimum.
+**Rule 3:** Regularly fetch and sync your work branch with the latest changes from `main` to avoid large divergence:
 ```bash
 git checkout main && git pull origin main
-git checkout your-branch && git merge main
+git checkout frontend && git merge main
 ```
 
-**Rule 6:** If two people need to edit the same file, one finishes and merges first. The other pulls main, then continues.
+**Rule 4:** Before merging any work branch into `main`, confirm locally that all tests pass and there are no integration conflicts.
+
+**Rule 5:** Never force push (`git push --force`) to any of the five shared branches or the `main` branch.
+
+**Rule 6:** For documentation updates like the README or this guide, always commit and push to `document-update` first. Merge into `main` only after confirmation.
 
 ---
 
@@ -478,7 +480,7 @@ python -m venv venv
 source venv/bin/activate          # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python -m spacy download en_core_web_sm
-cp .env.example .env              # then add your ANTHROPIC_API_KEY
+cp .env.example .env              # then add your GROQ_API_KEY
 
 # Run backend
 uvicorn main:app --reload --port 8000
@@ -494,18 +496,24 @@ cp .env.example .env
 # Run frontend
 npm run dev
 
-# Git: start a new feature
-git checkout main && git pull origin main
-git checkout -b {prefix}/{feature-name}
+# Git: Syncing your work branch (e.g. nlp-pipeline)
+git checkout nlp-pipeline
+git pull origin nlp-pipeline
 
-# Git: save work
-git add -p                        # review changes before staging
-git commit -m "feat(scope): description"
-git push origin {your-branch}
-
-# Git: pull latest main into your branch
+# Git: Syncing with latest main changes
 git checkout main && git pull origin main
-git checkout {your-branch} && git merge main
+git checkout nlp-pipeline && git merge main
+
+# Git: Saving and pushing work
+git add -p
+git commit -m "feat(pipeline): description"
+git push origin nlp-pipeline
+
+# Git: Merging a verified branch to main
+git checkout main
+git pull origin main
+git merge nlp-pipeline
+git push origin main
 ```
 
 ---
