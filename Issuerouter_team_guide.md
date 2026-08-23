@@ -152,7 +152,7 @@ git push origin main
 ### 3.4 Branch protection (repo owner does this)
 Since all changes are to be done in five persistent branches (`frontend`, `backend`, `database`, `nlp-pipeline`, and `document-update`), the `main` branch functions as the single source of truth combining the whole project.
 
-**Rule:** Nobody commits directly to `main`. Every developer pushes to their respective persistent work branch. Merging into `main` only occurs after the changes are verified to be bug-free and working as expected.
+**Rule:** Direct pushes to `main` are strictly blocked by GitHub ruleset protection. All updates into the `main` branch must occur via Pull Requests. A PR requires at least **1 approving review** from a peer collaborator before it can be merged. PR authors are **strictly blocked** from approving or merging their own PRs.
 
 ---
 
@@ -189,15 +189,24 @@ git push origin frontend
 ```
 
 #### Step 4: Merging into the Main Branch (Default)
-When a branch has verified, working changes that need to be unified:
-1. Ensure the code has been successfully reviewed.
-2. Sync `main` locally, merge the work branch into it, and push to remote `main`:
-```bash
-git checkout main
-git pull origin main
-git merge frontend
-git push origin main
-```
+When a branch has verified, working changes that need to be unified, they must be merged via GitHub Pull Request:
+
+1. **Push your changes** to your remote persistent branch:
+   ```bash
+   git push origin frontend
+   ```
+2. **Open a Pull Request** on GitHub from your branch (e.g., `frontend`) into `main`.
+3. **Request a Peer Review**: Notify the team and request a review from another developer.
+4. **Obtain Approval**: The reviewer must inspect the changes, test if needed, and submit an **Approve** review. Note that you cannot approve or merge your own PR.
+5. **Merge the PR**: Once approved by a collaborator, merge the PR into `main` via the GitHub Web UI or CLI:
+   ```bash
+   gh pr merge --merge
+   ```
+6. **Sync your local main**:
+   ```bash
+   git checkout main
+   git pull origin main
+   ```
 ```
 
 ---
