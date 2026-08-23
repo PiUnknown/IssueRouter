@@ -47,3 +47,8 @@ next.user-config.*
 #__pycache__
 __pycache__/
 *.pyc
+
+# Local-only tracking files (specific to local developer system)
+flow.md
+decision.md
+changelog.md
