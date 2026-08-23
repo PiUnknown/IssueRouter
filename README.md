@@ -82,63 +82,125 @@ IssueRouter/
 │
 ├── backend/
 │   ├── main.py                   ← FastAPI app entry point + startup wiring
-│   ├── seed_db.py                ← loads tweets.json into raw_tweets table
-│   ├── requirements.txt          ← all Python dependencies
+│   ├── seed_db.py                ← seeds SQLite database (raw_tweets table)
+│   ├── requirements.txt          ← Python dependencies
 │   ├── .env                      ← API keys (never commit this)
-│   ├── .env.example              ← template for .env
-│   │
-│   ├── db/
-│   │   ├── database.py           ← SQLAlchemy engine, session, Base
-│   │   ├── models.py             ← RawTweet, Complaint, Cluster, Action tables
-│   │   └── schemas.py            ← Pydantic request/response shapes
-│   │
-│   ├── ingestion/
-│   │   ├── mock_feed.py          ← replays tweets.json one by one (legacy)
-│   │   ├── db_feed.py            ← reads unprocessed tweets from SQLite (current)
-│   │   ├── normaliser.py         ← cleans raw tweet text
-│   │   ├── x_listener.py        ← real tweepy stream (post-hackathon)
-│   │   └── tweets.json           ← 63 mock #complaints_gov posts
-│   │
-│   ├── pipeline/
-│   │   ├── classifier.py         ← BART zero-shot text classification
-│   │   ├── ner.py                ← spaCy NER + Indian locality gazetteer
-│   │   ├── urgency.py            ← keyword rules + retweet social signal boost
-│   │   ├── clusterer.py          ← sentence-transformers cosine similarity
-│   │   ├── summariser.py         ← Groq API llama summarisation
-│   │   ├── router.py             ← category + city → department mapping
-│   │   └── main.py               ← orchestrates all 6 stages in sequence
+│   ├── .env.example              ← template env configurations
 │   │
 │   ├── api/
-│   │   ├── clusters.py           ← GET /clusters, GET /clusters/{id}
-│   │   ├── actions.py            ← PUT /clusters/{id}/status
-│   │   └── stats.py              ← GET /stats
+│   │   ├── __init__.py
+│   │   ├── actions.py              ← PUT /clusters/{id}/status (assign/resolve)
+│   │   ├── clusters.py             ← GET /clusters, GET /clusters/{id}
+│   │   └── stats.py                ← GET /stats
+│   │
+│   ├── db/
+│   │   ├── __init__.py
+│   │   ├── database.py             ← SQLAlchemy database engine + session setup
+│   │   ├── models.py               ← RawTweet, Complaint, Cluster, Action tables
+│   │   └── schemas.py              ← Pydantic schemas for API request validation
+│   │
+│   ├── ingestion/
+│   │   ├── __init__.py
+│   │   ├── db_feed.py              ← background worker parsing raw_tweets into DB
+│   │   ├── mock_feed.py            ← legacy mock tweet feeder
+│   │   ├── normaliser.py           ← text normalisation routines
+│   │   ├── tweets.json             ← 63 pre-compiled mock tweets
+│   │   └── x_listener.py          ← Tweepy setup for real-time X listener
+│   │
+│   ├── pipeline/
+│   │   ├── __init__.py
+│   │   ├── classifier.py           ← BART zero-shot classification
+│   │   ├── clusterer.py            ← SentenceTransformers-based clusterer
+│   │   ├── main.py                 ← orchestrates 6 pipeline stages in sequence
+│   │   ├── ner.py                  ← spaCy model + locality EntityRuler
+│   │   ├── router.py               ← routes issues to departments
+│   │   ├── summariser.py           ← Groq llama-3.1-8b-instant summarizer
+│   │   └── urgency.py              ← urgency scoring logic
+│   │
+│   ├── output/
+│   │   └── processed_results.json  ← generated results cache
 │   │
 │   ├── cache/
-│   │   └── summaries.json        ← cached Groq summaries (API fallback)
+│   │   └── summaries.json          ← local Llama summary cache fallback
+│   │
+│   ├── scripts/                    ← backend scripts
+│   │   ├── pipeline_standalone.py
+│   │   ├── seed.py
+│   │   └── seed_db.py
 │   │
 │   └── tests/
-│       ├── test_classifier.py
-│       ├── test_ner.py
-│       ├── test_urgency.py
-│       └── test_clusterer.py
+│       └── test_pipeline.py        ← consolidated test suite
 │
 ├── frontend/
+│   ├── index.html                  ← React frontend entry point
+│   ├── package.json                ← frontend node dependencies
+│   ├── eslint.config.js
+│   ├── tailwind.config.js          ← Tailwind CSS setup
+│   ├── vite.config.js              ← Vite config (with proxy settings)
+│   │
+│   ├── public/
+│   │   ├── favicon.svg
+│   │   └── icons.svg
+│   │
 │   └── src/
+│       ├── App.css
+│       ├── App.jsx                 ← root React component (routes setup)
+│       ├── index.css
+│       ├── main.jsx
+│       │
 │       ├── api/
-│       │   └── client.js         ← axios instance + all API calls
+│       │   ├── client.js           ← Axios API instance base
+│       │   ├── clusters.js         ← API functions for fetching clusters
+│       │   └── stats.js            ← API functions for stats
+│       │
+│       ├── assets/
+│       │   ├── IssueRouter.png
+│       │   ├── index.js
+│       │   └── issuerouter-logo.svg
+│       │
 │       ├── components/
-│       │   ├── ClusterCard.jsx   ← ranked card with expand panel
-│       │   ├── Sidebar.jsx       ← dept + location filters
-│       │   ├── StatsBar.jsx      ← totals, urgency counts, live ticker
-│       │   ├── DemoTrigger.jsx   ← fires pre-canned tweet for judges
-│       │   └── DeptBadge.jsx     ← coloured department pill
-│       ├── pages/
-│       │   └── Dashboard.jsx     ← main page, wires all components
-│       └── hooks/
-│           ├── useClusters.js    ← polls GET /clusters every 5s
-│           └── useStats.js       ← polls GET /stats every 10s
+│       │   ├── layout/             ← page layout components
+│       │   │   ├── Layout.jsx
+│       │   │   ├── Sidebar.jsx
+│       │   │   └── Topbar.jsx
+│       │   │
+│       │   └── ui/                 ← reusable UI cards and elements
+│       │       ├── Chart.jsx
+│       │       ├── ClusterCard.jsx
+│       │       ├── FilterBar.jsx
+│       │       ├── StatCard.jsx
+│       │       └── Table.jsx
+│       │
+│       ├── context/                ← global state management
+│       │   ├── ThemeContext.jsx
+│       │   └── IssueContext.jsx
+│       │
+│       ├── data/                   ← mock dashboard details
+│       │   ├── accountability.js
+│       │   ├── analytics.js
+│       │   ├── Clusters.js
+│       │   └── Officers.js
+│       │
+│       ├── hooks/
+│       │   ├── useClusters.js      ← polls /clusters every 5 seconds
+│       │   └── useStats.js         ← polls /stats every 10 seconds
+│       │
+│       └── pages/                  ← individual dashboard routes
+│           ├── Analytics.jsx       ← analytics & charts
+│           ├── Dashboard.jsx       ← main complaint dashboard
+│           ├── Maps.jsx            ← geographical map coordinates visualization
+│           ├── Progress.jsx        ← status & progress tracking page
+│           └── Settings.jsx        ← configurations preference settings
+│
+├── scripts/                        ← root utility scripts
+│   ├── check_env.ps1               ← validates development packages
+│   ├── push_all.ps1                ← integration helper
+│   ├── start_backend.ps1           ← activates venv and boots FastAPI server
+│   └── start_frontend.ps1          ← installs node packages and starts Vite
 │
 ├── .gitignore
+├── LICENSE
+├── package-lock.json
 └── README.md
 ```
 
